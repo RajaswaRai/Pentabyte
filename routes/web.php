@@ -35,4 +35,20 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+Route::get('/student-card-report', function () {
+    return Inertia::render('StudentCardReport');
+});
+
+Route::get('/classroom', function () {
+    return Inertia::render('Classroom');
+});
+
+Route::get('/student-assignment', function () {
+    return Inertia::render('StudentAssignment');
+});
+
+Route::get('/teacher-student-absence', function () {
+    return Inertia::render('TeacherStudentAbsence');
+});
+
+require __DIR__ . '/auth.php';
