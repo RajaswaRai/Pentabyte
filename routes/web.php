@@ -35,20 +35,26 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/student-card-report', function () {
-    return Inertia::render('StudentCardReport');
-});
+Route::middleware(['auth', 'verified'])->group(function () {
 
-Route::get('/classroom', function () {
-    return Inertia::render('Classroom');
-});
-
-Route::get('/student-assignment', function () {
-    return Inertia::render('StudentAssignment');
-});
-
-Route::get('/teacher-student-absence', function () {
-    return Inertia::render('TeacherStudentAbsence');
+    // Student
+    Route::get('/report-card', function () {
+        return Inertia::render('StudentCardReport');
+    })->name('report_card');
+    
+    // Student & Teacher
+    Route::get('/classroom', function () {
+        return Inertia::render('Classroom');
+    })->name('classroom');
+    
+    Route::get('/assignment', function () {
+        return Inertia::render('Assignment');
+    })->name('assignment');
+    
+    Route::get('/teacher-student-absence', function () {
+        return Inertia::render('TeacherStudentAbsence');
+    })->name('absence');
+    
 });
 
 require __DIR__ . '/auth.php';
