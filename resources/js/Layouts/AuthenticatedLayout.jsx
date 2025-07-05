@@ -4,6 +4,7 @@ import Dropdown from "@/Components/Dropdown";
 import NavLink from "@/Components/NavLink";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink";
 import { Link } from "@inertiajs/react";
+import { roleMap, userRole } from "@/utils/enums";
 
 export default function Authenticated({ user, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
@@ -11,12 +12,12 @@ export default function Authenticated({ user, header, children }) {
 
     return (
         <div className="min-h-screen bg-[#EEF2F6]">
-            <nav className="bg-[#153580] text-white border-b border-[#EEF2F6]">
+            <nav className="bg-[#153580] text-white">
                 <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="shrink-0 flex items-center">
                             <Link href="/">
-                                <ApplicationLogo className="block h-9 w-auto fill-current text-white" />
+                                <ApplicationLogo className="block h-12 w-auto" />
                             </Link>
                         </div>
 
@@ -25,6 +26,12 @@ export default function Authenticated({ user, header, children }) {
                                 <NavLink
                                     href={route("dashboard")}
                                     active={route().current("dashboard")}
+                                >
+                                    Beranda
+                                </NavLink>
+                                <NavLink
+                                    href={route("assignments")}
+                                    active={route().current("assignments")}
                                 >
                                     Beranda
                                 </NavLink>
@@ -54,10 +61,17 @@ export default function Authenticated({ user, header, children }) {
                                                     />
                                                     <div>
                                                         <p className="text-left mb-1">
-                                                            {user.name}
+                                                            {
+                                                                user[
+                                                                    roleMap[
+                                                                        user
+                                                                            .role
+                                                                    ]
+                                                                ]?.full_name
+                                                            }
                                                         </p>
-                                                        <p className=" text-left">
-                                                            Mahasiswa
+                                                        <p className=" text-left capitalize">
+                                                            {roleMap[user.role]}
                                                         </p>
                                                     </div>
                                                 </div>

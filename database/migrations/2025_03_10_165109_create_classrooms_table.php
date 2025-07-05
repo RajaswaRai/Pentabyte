@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('classrooms', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('teacher_id')->nullable()->constrained('teachers', 'id')->nullOnDelete();
+            $table->foreignId('homeroom_teacher_id')->nullable()->constrained('teachers', 'id')->nullOnDelete();
             $table->string('name');
             $table->timestamps();
         });

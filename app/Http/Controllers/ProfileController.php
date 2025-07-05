@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\UserRole;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
@@ -33,6 +34,30 @@ class ProfileController extends Controller
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
+        }
+
+        // Update role-specific data
+        switch ($request->user()->role) {
+            case UserRole::ADMIN:
+                $request->user()->admin()->update([
+                    'full_name' => $request->input('full_name'),
+                ]);
+                break;
+            case UserRole::TEACHER:
+                $request->user()->teacher()->update([
+                    'full_name' => $request->input('full_name'),
+                ]);
+                break;
+            case UserRole::STUDENT:
+                $request->user()->student()->update([
+                    'full_name' => $request->input('full_name'),
+                ]);
+                break;
+            case UserRole::GUARDIAN:
+                $request->user()->guardian()->update([
+                    'full_name' => $request->input('full_name'),
+                ]);
+                break;
         }
 
         $request->user()->save();

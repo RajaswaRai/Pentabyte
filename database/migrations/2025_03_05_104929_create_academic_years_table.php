@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('report_cards', function (Blueprint $table) {
+        Schema::create('academic_years', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained('students', 'id')->cascadeOnDelete();
-            $table->foreignId('classroom_id')->constrained('classrooms', 'id')->cascadeOnDelete();
-            $table->json('grades');
-            $table->integer('semester');
             $table->timestamps();
         });
     }
@@ -26,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('report_cards');
+        Schema::dropIfExists('academic_years');
     }
 };
