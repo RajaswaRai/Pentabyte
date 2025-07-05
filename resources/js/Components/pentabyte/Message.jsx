@@ -1,4 +1,6 @@
 // msg from LessonComment model
+import { timeAgoIndoFromString } from '../../utils/time';
+
 export default function Message({ comment }) {
     return (
         <div className="flex gap-3 mb-5 items-center">
@@ -11,9 +13,10 @@ export default function Message({ comment }) {
                 }
                 alt="user_profile"
             />
+
             <div>
                 <p className="text-xl font-semibold">
-                    {comment.user?.username ?? "nama"}
+                    {comment.user?.username ?? "nama"} <span className="text-black/50">{timeAgoIndoFromString(comment.created_at) ?? "time"}</span>
                 </p>
                 <p className="text-black/50">{comment.content}</p>
             </div>

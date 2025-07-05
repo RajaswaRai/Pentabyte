@@ -1,7 +1,7 @@
 import Modal from "@/Components/Modal";
 import Assignment from "@/Components/pentabyte/Assignment";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react";
 import moment from "moment";
 import { useState } from "react";
 import Comments from "../Features/Comments";
@@ -303,6 +303,7 @@ function CommentModalButton({ lesson_id }) {
     const [showModal, setShowModal] = useState(false);
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [commentText, setCommentText] = useState("");
 
     const loadComments = async () => {
         setLoading(true);
@@ -352,9 +353,29 @@ function CommentModalButton({ lesson_id }) {
                         <textarea
                             placeholder="Tulis komentar..."
                             rows={3}
+                            value={commentText}
+                            onChange={(e) => setCommentText(e.target.value)}
                             className="w-full p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring focus:border-blue-300"
                         />
-                        <button className="mt-3 px-4 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600">
+                        <button 
+                            onClick={() => {
+                                if (!commentText.trim()) return;
+
+                                router.post(route('lesson.comments.store', lesson_id),
+                                    { content: commentText }, // <-- langsung objek data di argumen kedua
+                                    {
+                                        preserveScroll: true,
+                                        onSuccess: () => {
+                                            setCommentText("");
+                                            loadComments();
+                                        },
+                                        onError: (errors) => {
+                                            console.error("Validasi gagal:", errors);
+                                        },
+                                    }
+                                );
+                            }} 
+                            className="mt-3 px-4 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600">
                             Kirim
                         </button>
                     </div>
