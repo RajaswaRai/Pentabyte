@@ -13,6 +13,14 @@ export default function ClassroomPage({
     assignments,
     class_students_count,
 }) {
+    const [showModal, setShowModal] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    const openModal = () => {
+        setShowModal(true);
+        // loadComments();
+    };
+
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -214,7 +222,7 @@ export default function ClassroomPage({
                                         </div>
                                     </div>
                                     <div>
-                                        <button className="text-[#FDA262] font-semibold text-sm">
+                                        <button onClick={openModal} className="text-[#FDA262] font-semibold text-sm">
                                             Lihat Detail presensi
                                         </button>
                                     </div>
@@ -224,6 +232,49 @@ export default function ClassroomPage({
                     </div>
                 </div>
             </div>
+            <Modal
+                show={showModal}
+                onClose={() => setShowModal(false)}
+                maxWidth="2xl"
+            >
+
+                <div className="">
+                    {/* Hidden button to satisfy FocusTrap */}
+                    <button className="sr-only" tabIndex={0}>Hidden Focus</button>
+                    <h2 className="text-xl font-semibold text-white bg-blue-500 mb-4"><span className="ml-4">Presensi</span></h2>
+                    <div className="grid grid-cols-4 gap-4 text-sm font-medium text-gray-500">
+                        <span className="text-center">Sesi</span>
+                        <span className="text-center">Status</span>
+                        <span className="text-center">Tanggal & Waktu</span>
+                        <span className="text-center">Kehadiran</span>
+                    </div>
+
+                    <div className="my-2 space-y-3 max-h-64 overflow-y-auto">
+                        {/* {data?.map((item, idx) => ( */}
+                            <div
+                                // key={idx}
+                                className="grid grid-cols-4 gap-4 items-center text-center text-sm"
+                            >
+                                <span>
+                                    <span className="bg-blue-100 text-blue-800 font-semibold px-4 py-1 rounded-full inline-block">
+                                        {/* {item.sesi} */}Sesi 1
+                                    </span>
+                                </span>
+                                <span className="text-gray-800">Selesai</span>
+                                <span className="text-blue-700 flex items-center justify-center gap-1">
+                                    {/* <Clock size={16} className="text-gray-400" /> */}
+                                    {/* {item.tanggal} */}tgl now
+                                </span>
+                                <span>
+                                    <span className="bg-green-200 text-green-800 font-semibold px-4 py-1 rounded-full inline-block">
+                                        Hadir
+                                    </span>
+                                </span>
+                            </div>
+                        {/* ))} */}
+                    </div>
+                </div>
+            </Modal>
         </AuthenticatedLayout>
     );
 }
