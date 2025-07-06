@@ -57,9 +57,21 @@ class AdminController extends Controller
   
     public function schedule(Request $request) {
 
-        $schedules = SubjectClassTeacher::all();
+        // $schedules = SubjectClassTeacher::all();
 
-        return Inertia::render('Admin/SchedulePage', compact('schedules'));
+        // return Inertia::render('Admin/SchedulePage', compact('schedules'));
+
+         $classroom = Classroom::with([
+            'semester', 
+            'subjectClassTeacher', 
+            'subjectClassTeacher.subject',
+            'subjectClassTeacher.teacher',
+        ])->findOrFail($request->id);
+        return Inertia::render('Admin/ScheduleShowPage', compact('classroom'));
+    }
+    public function schedule_show(Request $request, SubjectClassTeacher $schedule) {
+
+        return Inertia::render('Admin/SchedulePage', compact('$'));
     }
     
     public function semester(Request $request) {

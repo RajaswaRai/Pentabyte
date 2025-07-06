@@ -8,27 +8,14 @@ export default function SchedulePage({ auth }) {
 
             <div className="mx-auto max-w-screen-2xl">
                 <div className="py-5 px-5">
-                    <div className="flex items-center justify-between gap-3">
-                        <p className="font-bold text-2xl">Manajemen Jadwal</p>
-                        <button className="p-3 rounded-md text-white bg-blue-500">
-                            Tambah Jadwal
-                        </button>
-                    </div>
+                    <p className="font-bold text-2xl">Manajemen Kelas</p>
 
                     <div className="bg-white p-7 rounded-md my-5">
                         <div className="flex gap-5">
                             <div className="flex-1">
                                 <label className="font-semibold">
-                                    Semester
+                                    Nama Kelas
                                 </label>
-                                <input
-                                    className="w-full rounded-md border px-2 py-1"
-                                    type="text"
-                                    readOnly
-                                />
-                            </div>
-                            <div className="flex-1">
-                                <label className="font-semibold">Kelas</label>
                                 <input
                                     className="w-full rounded-md border px-2 py-1"
                                     type="text"
@@ -37,16 +24,8 @@ export default function SchedulePage({ auth }) {
                             </div>
                             <div className="flex-1">
                                 <label className="font-semibold">
-                                    Mata Pelajaran
+                                    Wali Kelas
                                 </label>
-                                <input
-                                    className="w-full rounded-md border px-2 py-1"
-                                    type="text"
-                                    readOnly
-                                />
-                            </div>
-                            <div className="flex-1">
-                                <label className="font-semibold">Guru</label>
                                 <input
                                     className="w-full rounded-md border px-2 py-1"
                                     type="text"

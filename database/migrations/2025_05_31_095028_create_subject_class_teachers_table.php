@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('subject_class_teachers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('semester_id')->nullable()->constrained('semesters', 'id')->cascadeOnDelete();
             $table->foreignId('subject_id')->nullable()->constrained('subjects', 'id')->nullOnDelete();
             $table->foreignId('classroom_id')->nullable()->constrained('classrooms', 'id')->cascadeOnDelete();
             $table->foreignId('teacher_id')->nullable()->constrained('teachers', 'id')->nullOnDelete();

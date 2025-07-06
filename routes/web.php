@@ -72,6 +72,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/student', [AdminController::class, 'student'])->name('admin.student');
         
         Route::get('/schedule', [AdminController::class, 'schedule'])->name('admin.schedule');
+        Route::get('/schedule/{schedule}', [AdminController::class, 'schedule_show'])->name('admin.schedule.show');
 
         Route::get('/semester', [AdminController::class, 'semester'])->name('admin.semester');
 
