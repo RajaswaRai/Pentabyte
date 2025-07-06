@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Constants\UserRole;
+use App\Http\Controllers\Admin\AdminController;
 use App\Models\LessonComment;
 use Illuminate\Http\Request;
 
@@ -83,7 +84,6 @@ class DashboardController extends Controller
             ->where('lesson_id', $lesson_id)
             ->orderBy('created_at', 'desc')
             ->get();
-
 
         return response()->json([
             'id' => $lesson_id,

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ClassroomController;
+use App\Http\Controllers\Admin\SemesterController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\TeacherController;
@@ -72,8 +73,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/student', [AdminController::class, 'student'])->name('admin.student');
         
         Route::get('/schedule', [AdminController::class, 'schedule'])->name('admin.schedule');
+        Route::get('/schedule/{schedule}', [AdminController::class, 'schedule_show'])->name('admin.schedule.show');
+
+        Route::get('/semester', [AdminController::class, 'semester'])->name('admin.semester');
 
         // Proccess
+        Route::post('/semester/add', [SemesterController::class, 'store'])->name('admin.semester.store');
+        Route::put('/semester/{semester}', [SemesterController::class, 'bulkUpdate'])->name('admin.semester.update');
+        Route::delete('/semester/{id}', [SemesterController::class, 'bulkDestroy'])->name('admin.semester.destroy');
+
         Route::post('/student/add', [StudentController::class, 'store'])->name('admin.student.store');
         Route::put('/student/{student}', [StudentController::class, 'update'])->name('admin.student.update');
         Route::delete('/student/{id}', [StudentController::class, 'destroy'])->name('admin.student.destroy');
