@@ -9,6 +9,8 @@ use App\Models\Assignment;
 use App\Models\Classroom;
 use App\Models\Lesson;
 use App\Models\LessonComment;
+use App\Models\Major;
+use App\Models\Semester;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\SubjectClassTeacher;
@@ -55,9 +57,28 @@ class DatabaseSeeder extends Seeder
             'nip' => fake()->randomNumber(9),
             'full_name' => 'Dr. Legowo'
         ]);
+        $major = Major::create([
+            'name' => 'Software Engineer',
+            'code' => 'SE',
+        ]);
         $class = Classroom::create([
             'homeroom_teacher_id' => $teacher->id,
-            'name' => 'A'
+            'name' => 'A',
+            'major_id' => $major->id,
+        ]);
+        $ganjil = Semester::create([
+            "name" => "Ganjil 2025/2026",
+            "academic_year" => "2025",
+            "semester_type" => "1", // ganjil
+            "start_date" => Carbon::now()->format('Y-m-d'),
+            "end_date" => Carbon::now()->addMonth(6)->format('Y-m-d'),
+        ]);
+        $genap = Semester::create([
+            "name" => "Genap 2025/2026",
+            "academic_year" => "2025",
+            "semester_type" => "2", // genap
+            "start_date" => Carbon::now()->addMonth(6)->format('Y-m-d'),
+            "end_date" => Carbon::now()->addYear(1)->format('Y-m-d'),
         ]);
         $sct = SubjectClassTeacher::create([
             'day' => (string) Carbon::now()->dayOfWeek,
@@ -66,6 +87,7 @@ class DatabaseSeeder extends Seeder
             'subject_id' => $subject->id,
             'teacher_id' => $teacher->id,
             'classroom_id' => $class->id,
+            'semester_id' => $ganjil->id,
         ]);
         $lesson = Lesson::create([
             'subject_class_teacher_id' => $sct->id,
@@ -80,7 +102,7 @@ class DatabaseSeeder extends Seeder
         Assignment::create([
             'name' => 'Kalkulus 3',
             'description' => 'berhitung mtk',
-            'due_date' => date('Y-m-d'),
+            'due_date' => Carbon::now()->addDay(1)->format('Y-m-d'),
             'due_time' => Carbon::now()->format('H:i:s'),
             'lesson_id' => $lesson->id,
         ]);
@@ -96,6 +118,7 @@ class DatabaseSeeder extends Seeder
             'gender' => 'male',
             'phone' => '0888777666',
             'user_id' => $student->id,
+            'major_id' => $major->id,
             'classroom_id' => $class->id,
         ]);
         

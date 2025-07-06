@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Classroom;
+use App\Models\Semester;
 use App\Models\Student;
 use App\Models\Subject;
+use App\Models\SubjectClassTeacher;
 use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -51,6 +53,20 @@ class AdminController extends Controller
         $students = User::with('student')->whereHas('student')->get();
 
         return Inertia::render('Admin/StudentPage', compact('students'));
+    }
+  
+    public function schedule(Request $request) {
+
+        $schedules = SubjectClassTeacher::all();
+
+        return Inertia::render('Admin/SchedulePage', compact('schedules'));
+    }
+    
+    public function semester(Request $request) {
+        
+        $semesters = Semester::all();
+
+        return Inertia::render('Admin/SemesterPage', compact('semesters'));
     }
     
     public function users(Request $request) {

@@ -11,6 +11,16 @@ const roleMap = {
     [userRole.GUARDIAN]: 'guardian',
 };
 
+const semesterType = {
+    GANJIL: 1,
+    GENAP: 2,
+}
+const semesterMap = {
+    [semesterType.GANJIL]: 'ganjil',
+    [semesterType.GENAP]: 'genap',
+};
+
 export {
-    userRole, roleMap
+    userRole, roleMap,
+    semesterType, semesterMap,
 }

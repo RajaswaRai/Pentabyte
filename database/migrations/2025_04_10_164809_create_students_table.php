@@ -19,8 +19,8 @@ return new class extends Migration
             $table->enum('gender', ['male', 'female']);
             $table->string('phone');
             $table->foreignId('user_id')->constrained('users', 'id')->cascadeOnDelete();
+            $table->foreignId('major_id')->nullable()->constrained('majors', 'id')->nullOnDelete();
             $table->foreignId('classroom_id')->nullable()->constrained('classrooms', 'id')->nullOnDelete();
-
             $table->timestamps();
         });
     }

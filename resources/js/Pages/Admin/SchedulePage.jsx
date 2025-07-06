@@ -6,14 +6,7 @@ import { Head, Link } from "@inertiajs/react";
 
 export default function SchedulePage({ auth, sct, assignments }) {
     return (
-        <AdminLayout
-            user={auth.user}
-            header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-                    Schedule
-                </h2>
-            }
-        >
+        <>
             <Head title="Schedule" />
 
             <div className="mx-auto max-w-screen-2xl">
@@ -22,6 +15,10 @@ export default function SchedulePage({ auth, sct, assignments }) {
                     <p className="font-bold text-2xl">Schedule</p>
                 </div>
             </div>
-        </AdminLayout>
+        </>
     );
 }
+
+SchedulePage.layout = (page) => (
+    <AdminLayout user={page.props.auth.user}>{page}</AdminLayout>
+);

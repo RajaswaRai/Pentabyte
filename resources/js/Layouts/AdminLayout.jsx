@@ -89,6 +89,8 @@ export default function Authenticated({ user, children }) {
                                 },
                                 { label: "Guru", route: "admin.teacher" },
                                 { label: "Murid", route: "admin.student" },
+                                { label: "Jadwal", route: "admin.schedule" },
+                                { label: "Semester", route: "admin.semester" },
                             ].map(({ label, route: routeName }) => (
                                 <SidebarLink
                                     key={routeName}
