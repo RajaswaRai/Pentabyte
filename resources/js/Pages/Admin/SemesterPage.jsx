@@ -17,6 +17,10 @@ export default function ScheduleShowPage({ auth, classroom }) {
     const [selectedItem, setSelectedItem] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
+    console.log(auth)
+    console.log(classroom)
+    console.log(classroom.subject_class_teacher)
+
     const openModal = (item) => {
         setSelectedItem(item);
         setShowModal(true);

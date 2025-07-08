@@ -77,6 +77,11 @@ class AdminController extends Controller
     public function semester(Request $request) {
         
         $semesters = Semester::all();
+        // $semesters = Semester::with([
+        //     'subjectClassTeachers.subject', 
+        //     'subjectClassTeachers.classroom', 
+        //     'subjectClassTeachers.teacher',
+        // ])->findOrFail($request->id = 1);
 
         return Inertia::render('Admin/SemesterPage', compact('semesters'));
     }

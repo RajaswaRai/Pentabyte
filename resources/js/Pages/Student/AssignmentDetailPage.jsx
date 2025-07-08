@@ -4,9 +4,42 @@ import moment from "moment";
 import { useEffect, useRef, useState } from "react";
 import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
-import { schema } from "prosemirror-schema-basic";
+import { Schema } from "prosemirror-model";
+import { schema as baseSchema } from "prosemirror-schema-basic";
+import { addListNodes } from "prosemirror-schema-list";
+
+const schema = new Schema({
+    nodes: addListNodes(baseSchema.spec.nodes, "paragraph block*", "block"),
+    marks: baseSchema.spec.marks,
+});
+
 import { keymap } from "prosemirror-keymap";
-import { baseKeymap, toggleMark, wrapIn } from "prosemirror-commands";
+import { baseKeymap, toggleMark, wrapIn, setBlockType, chainCommands } from "prosemirror-commands";
+import { liftListItem, sinkListItem, splitListItem, wrapInList } from "prosemirror-schema-list";
+
+// custom keymap to enable list behavior
+const customListKeymap = keymap({
+    // Enter = keluar dari list, buat paragraf biasa
+    "Enter": (state, dispatch) => {
+        const { $from } = state.selection;
+        const listItem = schema.nodes.list_item;
+
+        if ($from.parent.type === listItem) {
+            const paragraph = schema.nodes.paragraph.createAndFill();
+            const tr = state.tr.replaceRangeWith($from.before($from.depth), $from.after($from.depth), paragraph);
+            dispatch(tr.scrollIntoView());
+            return true;
+        }
+
+        return false;
+    },
+    "Shift-Enter": splitListItem(schema.nodes.list_item),
+    "Tab": sinkListItem(schema.nodes.list_item),
+    "Shift-Tab": liftListItem(schema.nodes.list_item),
+});
+
+import { dropCursor } from "prosemirror-dropcursor";
+import { gapCursor } from "prosemirror-gapcursor";
 import { undo, redo, history } from "prosemirror-history";
 import "prosemirror-view/style/prosemirror.css";
 import "prosemirror-menu/style/menu.css";
@@ -55,76 +88,100 @@ export default function AssignmentDetailPage({
             const items = [
                 new MenuItem({
                     command: toggleMark(marks.strong),
+                    run: toggleMark(marks.strong),
                     title: "Bold",
                     icon: icons.strong,
                 }),
                 new MenuItem({
                     command: toggleMark(marks.em),
+                    run: toggleMark(marks.em),
                     title: "Italic",
                     icon: icons.em,
                 }),
                 new MenuItem({
                     command: toggleMark(marks.code),
+                    run: toggleMark(marks.code),
                     title: "Code",
                     icon: icons.code,
                 }),
-                blockTypeItem(nodes.paragraph, {
+                new MenuItem({
                     title: "Paragraph",
                     label: "P",
+                    command: setBlockType(nodes.paragraph),
+                    run: setBlockType(nodes.paragraph),
                 }),
-                blockTypeItem(nodes.heading, {
+                new MenuItem({
                     title: "Heading 1",
                     label: "H1",
-                    attrs: { level: 1 },
+                    command: setBlockType(nodes.heading, { level: 1 }),
+                    run: setBlockType(nodes.heading, { level: 1 }),
                 }),
-                blockTypeItem(nodes.heading, {
+                new MenuItem({
                     title: "Heading 2",
                     label: "H2",
-                    attrs: { level: 2 },
+                    command: setBlockType(nodes.heading, { level: 2 }),
+                    run: setBlockType(nodes.heading, { level: 2 }),
                 }),
                 new MenuItem({
                     command: wrapIn(nodes.blockquote),
+                    run: wrapIn(nodes.blockquote),
                     title: "Blockquote",
                     icon: icons.blockquote,
                 }),
                 new MenuItem({
-                    command: wrapIn(nodes.bullet_list),
+                    command: wrapInList(nodes.bullet_list),
+                    run: wrapInList(nodes.bullet_list),
                     title: "Bullet List",
                     icon: icons.bulletList,
                 }),
                 new MenuItem({
-                    command: wrapIn(nodes.ordered_list),
+                    command: wrapInList(nodes.ordered_list),
+                    run: wrapInList(nodes.ordered_list),
                     title: "Ordered List",
                     icon: icons.orderedList,
                 }),
                 new MenuItem({
                     command: undo,
+                    run: undo,
                     title: "Undo",
                     icon: icons.undo,
                 }),
                 new MenuItem({
                     command: redo,
+                    run: redo,
                     title: "Redo",
                     icon: icons.redo,
                 }),
             ];
 
+            console.log("ITEMS = ", items);
+
+            console.log("SCHEMA NODES:", Object.keys(schema.nodes));
+
+            setTimeout(() => console.log(editorViewRef.current.state.doc.toJSON()), 500)
+
             editorViewRef.current = new EditorView(editorRef.current, {
                 state: EditorState.create({
-                    doc: schema.topNodeType.createAndFill(),
+                    schema,
+                    doc: schema.node("doc", null, [schema.node("paragraph")]),
                     plugins: [
                         history(),
+                        customListKeymap,
                         keymap(baseKeymap),
-                        menuBar({ floating: false, content: [items] }), // <- FIX: wrapped in another array
+                        dropCursor(),
+                        gapCursor(),
+                        menuBar({ floating: false, content: [items] }), // pastikan `items` punya list buttons
                     ],
                 }),
                 dispatchTransaction(transaction) {
-                    const newState =
-                        editorViewRef.current.state.apply(transaction);
-                    editorViewRef.current.updateState(newState);
+                    const view = editorViewRef.current;
+                    if (!view) return;
+                    const newState = view.state.apply(transaction);
+                    view.updateState(newState);
                     setAnswerContent(newState.doc.textContent);
-                },
+                }
             });
+              
         }
     }, []);
 
