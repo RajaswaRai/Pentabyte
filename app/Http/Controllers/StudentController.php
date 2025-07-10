@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Absence;
 use App\Models\Assignment;
 use App\Models\Lesson;
 use App\Models\LessonComment;
@@ -56,6 +57,21 @@ class StudentController extends Controller
         return Inertia::render('Student/ClassroomPage', compact('sct', 'class_students_count', 'lessons', 'assignments'));
     }
 
+    public function absence(Request $request, $sct_id) {
+
+        $absences = Absence::where('subject_class_teacher_id', $sct_id)->get();
+        
+        return Inertia::render('Absence', compact('absences'));
+    }
+    public function absence_show(Request $request, $sct_id) {
+        
+        return Inertia::render('AbsenceShow');
+    }
+    public function absence_store(Request $request) {
+        
+        return redirect()->back()->with('success', 'Berhasil simpan absen');
+    }
+   
     public function assignments(Request $request) {
         
         return Inertia::render('Student/Assignments');

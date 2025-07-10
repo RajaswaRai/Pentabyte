@@ -8,23 +8,37 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 
-export default function ClassroomShowPage({ auth, classroom, student_select }) {
+export default function ClassroomShowPage({
+    auth,
+    classroom,
+    classrooms,
+    student_select,
+}) {
     const [showAddModal, setShowAddModal] = useState(false);
 
-    const { data, setData, post, processing, reset, errors } = useForm({
-        student_id: "",
+    const { data, setData, put, processing, reset, errors } = useForm({
+        classroom: classroom.id,
+        student: "",
     });
 
-    function handleAddStudent(e) {
+    const handleAddStudent = (e) => {
         e.preventDefault();
 
-        post(route("admin.classroom.student.store", classroom.id), {
-            onSuccess: () => {
-                setShowAddModal(false);
-                reset();
-            },
-        });
-    }
+        if (!data.student) return;
+
+        put(
+            route("admin.classroom.student.move", {
+                classroom: data.classroom,
+                student: data.student,
+            }),
+            {
+                onSuccess: () => {
+                    setShowAddModal(false);
+                    reset("student"); // reset hanya student, classroom tetap
+                },
+            }
+        );
+    };
 
     const students = classroom.students || [];
 
@@ -48,21 +62,35 @@ export default function ClassroomShowPage({ auth, classroom, student_select }) {
             {
                 header: "Aksi",
                 cell: ({ row }) => (
-                    <button
-                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                        onClick={() => {
-                            if (confirm("Yakin ingin menghapus siswa ini?")) {
-                                router.delete(
-                                    route("admin.classroom.student.destroy", [
-                                        classroom.id,
-                                        row.original.id,
-                                    ])
-                                );
-                            }
-                        }}
-                    >
-                        Hapus
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
+                            onClick={() => {
+                                setMovingStudent(row.original);
+                                setMoveData("classroom_id", classroom.id); // default classroom sekarang
+                                setShowMoveModal(true);
+                            }}
+                        >
+                            Pindah
+                        </button>
+                        <button
+                            className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                            onClick={() => {
+                                if (
+                                    confirm("Yakin ingin menghapus siswa ini?")
+                                ) {
+                                    router.delete(
+                                        route(
+                                            "admin.classroom.student.remove",
+                                            [classroom.id, row.original.id]
+                                        )
+                                    );
+                                }
+                            }}
+                        >
+                            Hapus
+                        </button>
+                    </div>
                 ),
             },
         ],
@@ -75,6 +103,20 @@ export default function ClassroomShowPage({ auth, classroom, student_select }) {
         getCoreRowModel: getCoreRowModel(),
     });
 
+    const [showMoveModal, setShowMoveModal] = useState(false);
+    const [movingStudent, setMovingStudent] = useState(null);
+
+    const {
+        data: moveData,
+        setData: setMoveData,
+        put: movePut,
+        processing: moveProcessing,
+        reset: resetMoveForm,
+        errors: moveErrors,
+    } = useForm({
+        classroom_id: "",
+    });
+
     return (
         <AdminLayout
             user={auth.user}
@@ -84,13 +126,13 @@ export default function ClassroomShowPage({ auth, classroom, student_select }) {
                 </h2>
             }
         >
-            <Head title={"Classroom - " + classroom.name} />
+            <Head title={`Classroom - ${classroom.name}`} />
 
             <div className="mx-auto max-w-screen-2xl">
                 <div className="py-5 px-5">
                     <p className="font-bold text-2xl">Manajemen Kelas</p>
 
-                    {/* Informasi Kelas */}
+                    {/* Info kelas */}
                     <div className="bg-white p-7 rounded-md my-5">
                         <div className="flex gap-5">
                             <div className="flex-1">
@@ -118,7 +160,7 @@ export default function ClassroomShowPage({ auth, classroom, student_select }) {
                         </div>
                     </div>
 
-                    {/* Tabel Siswa */}
+                    {/* Tabel siswa */}
                     <div className="bg-white p-7 rounded-md my-5">
                         <div className="flex items-center justify-between gap-3 mb-3">
                             <p className="font-semibold">Kelas Siswa List</p>
@@ -170,7 +212,77 @@ export default function ClassroomShowPage({ auth, classroom, student_select }) {
                 </div>
             </div>
 
-            {/* Modal Tambah Siswa */}
+            {/* Modal pindah siswa */}
+            <Modal show={showMoveModal} onClose={() => setShowMoveModal(false)}>
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        if (!movingStudent) return;
+
+                        movePut(
+                            route("admin.classroom.student.move", {
+                                classroom: moveData.classroom_id,
+                                student: movingStudent.id,
+                            }),
+                            {
+                                onSuccess: () => {
+                                    setShowMoveModal(false);
+                                    resetMoveForm();
+                                },
+                            }
+                        );
+                    }}
+                    className="p-6"
+                >
+                    <h2 className="text-lg font-bold mb-4">Pindah Kelas</h2>
+
+                    <div className="mb-4">
+                        <label className="block font-semibold mb-1">
+                            Pilih Kelas
+                        </label>
+                        <select
+                            value={moveData.classroom_id}
+                            onChange={(e) =>
+                                setMoveData("classroom_id", e.target.value)
+                            }
+                            className="w-full border rounded px-3 py-2"
+                        >
+                            <option value="">-- Pilih --</option>
+                            {classrooms
+                                .filter((c) => c.id !== classroom.id) // opsional, supaya tidak bisa pindah ke kelas yg sama
+                                .map((c) => (
+                                    <option key={c.id} value={c.id}>
+                                        {c.name}
+                                    </option>
+                                ))}
+                        </select>
+                        {moveErrors.classroom_id && (
+                            <p className="text-red-500 text-sm mt-1">
+                                {moveErrors.classroom_id}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="flex justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setShowMoveModal(false)}
+                            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={moveProcessing}
+                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        >
+                            Simpan
+                        </button>
+                    </div>
+                </form>
+            </Modal>
+
+            {/* Modal tambah siswa */}
             <Modal show={showAddModal} onClose={() => setShowAddModal(false)}>
                 <form onSubmit={handleAddStudent} className="p-6">
                     <h2 className="text-lg font-bold mb-4">Tambah Siswa</h2>
@@ -180,10 +292,8 @@ export default function ClassroomShowPage({ auth, classroom, student_select }) {
                             Siswa
                         </label>
                         <select
-                            value={data.student_id}
-                            onChange={(e) =>
-                                setData("student_id", e.target.value)
-                            }
+                            value={data.student}
+                            onChange={(e) => setData("student", e.target.value)}
                             className="w-full border rounded px-3 py-2"
                         >
                             <option value="">-- Pilih --</option>
@@ -193,15 +303,9 @@ export default function ClassroomShowPage({ auth, classroom, student_select }) {
                                 </option>
                             ))}
                         </select>
-                        {errors.student_id && (
+                        {errors.student && (
                             <p className="text-red-500 text-sm mt-1">
-                                {errors.student_id}
-                            </p>
-                        )}
-
-                        {errors.student_id && (
-                            <p className="text-red-500 text-sm mt-1">
-                                {errors.student_id}
+                                {errors.student}
                             </p>
                         )}
                     </div>

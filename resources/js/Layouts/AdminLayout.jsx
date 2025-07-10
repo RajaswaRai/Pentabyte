@@ -83,6 +83,7 @@ export default function Authenticated({ user, children }) {
                             {[
                                 { label: "Beranda", route: "admin.dashboard" },
                                 { label: "Kelas", route: "admin.classroom" },
+                                { label: "Jurusan", route: "admin.major" },
                                 {
                                     label: "Mata Pelajaran",
                                     route: "admin.subject",

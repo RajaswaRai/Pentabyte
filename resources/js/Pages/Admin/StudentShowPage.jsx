@@ -2,31 +2,13 @@ import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, useForm, router } from "@inertiajs/react";
 import { useMemo, useState } from "react";
 import Modal from "@/Components/Modal";
-import * as XLSX from "xlsx";
 import {
     useReactTable,
     getCoreRowModel,
     flexRender,
 } from "@tanstack/react-table";
 
-export default function StudentPage({ auth, students, majors }) {
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [editingStudent, setEditingStudent] = useState(null);
-    const [showImportModal, setShowImportModal] = useState(false);
-    const [importedData, setImportedData] = useState([]);
-    const [columnMapping, setColumnMapping] = useState({});
-
-    const dbFields = [
-        { value: "nisn", label: "NISN" },
-        { value: "full_name", label: "Nama Lengkap" },
-        { value: "date_of_birth", label: "Tanggal Lahir" },
-        { value: "gender", label: "Jenis Kelamin" },
-        { value: "phone", label: "No. Telepon" },
-        { value: "email", label: "Email" },
-        { value: "major_code", label: "Jurusan" },
-    ];
-
+export default function StudentShowPage({ auth, student }) {
     const { data, setData, post, processing, reset, errors } = useForm({
         full_name: "",
         nisn: "",
@@ -62,85 +44,30 @@ export default function StudentPage({ auth, students, majors }) {
 
     const [search, setSearch] = useState("");
 
-    function formatExcelDate(value) {
-        if (!value) return "";
-
-        if (typeof value === "number") {
-            const excelEpoch = new Date(Date.UTC(1899, 11, 30));
-            excelEpoch.setUTCDate(excelEpoch.getUTCDate() + value);
-            return excelEpoch.toISOString().split("T")[0];
-        }
-
-        const parsed = new Date(value);
-        if (!isNaN(parsed)) {
-            return parsed.toISOString().split("T")[0];
-        }
-
-        return value;
-    }
-
-    function handleFileUpload(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-            const data = new Uint8Array(evt.target.result);
-            const workbook = XLSX.read(data, { type: "array" });
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-            const headers = jsonData[0];
-            const rows = jsonData.slice(1);
-            const formattedData = rows.map((row) => {
-                let obj = {};
-                headers.forEach((header, index) => {
-                    let value = row[index] ?? "";
-
-                    // Format tanggal otomatis jika deteksi header mengandung kata "tanggal"
-                    if (header.toLowerCase().includes("tanggal")) {
-                        value = formatExcelDate(value);
-                    }
-
-                    obj[header] = value;
-                });
-                return obj;
-            });
-
-            setImportedData(formattedData);
-
-            const initialMapping = {};
-            headers.forEach((h) => (initialMapping[h] = ""));
-            setColumnMapping(initialMapping);
-        };
-        reader.readAsArrayBuffer(file);
-    }
-
     const dataTable = useMemo(() => {
         const keyword = search.toLowerCase();
-        return students
-            .map((student, index) => ({
-                id: student.student?.id,
+        return student
+            .map((s, index) => ({
+                id: s.id,
                 no: index + 1,
-                nisn: student.student?.nisn ?? "",
-                date_of_birth: student.student?.date_of_birth ?? "",
-                gender: student.student?.gender ?? "",
-                phone: student.student?.phone ?? "",
-                full_name: student.student?.full_name ?? "",
-                username: student.username ?? "",
-                email: student.email ?? "",
-                major: student.student?.major?.name ?? "", // ← jurusan
-                major_id: student.student?.major_id ?? null,
+                full_name: s.full_name ?? "",
+                nisn: s.nisn ?? "",
+                major: s.major?.name ?? "",
+                major_id: s.major_id ?? null,
+                username: s.username ?? "",
+                email: s.email ?? "",
+                date_of_birth: s.date_of_birth ?? "",
+                gender: s.gender ?? "",
+                phone: s.phone ?? "",
             }))
             .filter(
-                (student) =>
-                    student.full_name.toLowerCase().includes(keyword) ||
-                    student.nisn.toLowerCase().includes(keyword) ||
-                    student.username.toLowerCase().includes(keyword) ||
-                    student.email.toLowerCase().includes(keyword)
+                (s) =>
+                    s.full_name.toLowerCase().includes(keyword) ||
+                    s.nisn.toLowerCase().includes(keyword) ||
+                    s.username.toLowerCase().includes(keyword) ||
+                    s.email.toLowerCase().includes(keyword)
             );
-    }, [students, search]);
+    }, [student, search]);
 
     const columns = useMemo(
         () => [
@@ -152,7 +79,6 @@ export default function StudentPage({ auth, students, majors }) {
                 header: "Aksi",
                 cell: ({ row }) => (
                     <div className="flex gap-2">
-                        {/* detail */}
                         <button
                             className="p-1 rounded-md bg-blue-500 text-white"
                             onClick={() =>
@@ -163,7 +89,6 @@ export default function StudentPage({ auth, students, majors }) {
                         >
                             View
                         </button>
-                        {/* edit */}
                         <button
                             onClick={() => {
                                 setEditingStudent(row.original);
@@ -178,14 +103,12 @@ export default function StudentPage({ auth, students, majors }) {
                                     password: "",
                                     major_id: row.original.major_id ?? "",
                                 });
-
                                 setShowEditModal(true);
                             }}
                             className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
                         >
                             Edit
                         </button>
-                        {/* delete */}
                         <button
                             onClick={() => {
                                 if (
@@ -353,7 +276,7 @@ export default function StudentPage({ auth, students, majors }) {
 
                                 router.post(
                                     route("admin.student.import"),
-                                    { students: mappedData },
+                                    { student: mappedData },
                                     {
                                         onSuccess: () => {
                                             setShowImportModal(false);
@@ -713,7 +636,7 @@ export default function StudentPage({ auth, students, majors }) {
         </>
     );
 }
-StudentPage.layout = (page) => (
+StudentShowPage.layout = (page) => (
     <AdminLayout user={page.props.auth.user}>{page}</AdminLayout>
 );
 

@@ -9,8 +9,10 @@ class Lesson extends Model
 {
     use HasFactory;
 
-    public function assignments() {
-        return $this->hasMany(Assignment::class, 'lesson_id', 'id');
+    protected $guarded = ['id'];
+
+    public function assignment() {
+        return $this->hasOne(Assignment::class, 'lesson_id', 'id');
     }
 
     public function subjectClassroomTeacher() {

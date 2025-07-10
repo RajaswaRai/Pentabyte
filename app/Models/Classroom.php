@@ -11,6 +11,10 @@ class Classroom extends Model
 
     protected $guarded = ['id'];
 
+    public function major() {
+        return $this->hasOne(Major::class, 'id', 'major_id');
+    }
+
     public function subjectClassTeacher() {
         return $this->hasMany(SubjectClassTeacher::class, 'classroom_id', 'id');
     }

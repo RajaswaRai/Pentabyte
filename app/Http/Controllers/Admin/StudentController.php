@@ -4,15 +4,75 @@ namespace App\Http\Controllers\Admin;
 
 use App\Constants\UserRole;
 use App\Http\Controllers\Controller;
+use App\Models\Major;
 use App\Models\Student;
-use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class StudentController extends Controller
 {
+
+    public function import(Request $request)
+    {
+        $students = $request->input('students');
+
+        if (!is_array($students)) {
+            return redirect()->back()->withErrors(['import' => 'Data tidak valid.']);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($students as $student) {
+                // Validasi manual per siswa
+                $validator = Validator::make($student, [
+                    'full_name' => 'required|string|max:255',
+                    'nisn' => 'required|numeric|unique:students,nisn',
+                    'date_of_birth' => 'required|date',
+                    'gender' => 'required|string',
+                    'email' => 'nullable|email|unique:users,email',
+                    'phone' => 'nullable|regex:/^[0-9]{8,20}$/',
+                    'major_code' => 'required|exists:majors,code',
+                ]);
+
+                if ($validator->fails()) {
+                    throw new \Exception('Validasi gagal: ' . json_encode($validator->errors()->all()));
+                }
+
+                // Simpan user
+                $user = User::create([
+                    'username' => $student['nisn'],
+                    'email' => $student['email'] ?? null,
+                    'password' => bcrypt(str_replace('-', '', $student['date_of_birth'])),
+                    'role' => UserRole::STUDENT,
+                ]);
+
+                $major = Major::where('code', $student['major_code'])->firstOrFail();
+
+                // Simpan student
+                Student::create([
+                    'full_name' => $student['full_name'],
+                    'nisn' => $student['nisn'],
+                    'date_of_birth' => $student['date_of_birth'],
+                    'gender' => $student['gender'],
+                    'phone' => $student['phone'] ?? null,
+                    'major_id' => $major->id ?? null,
+                    'user_id' => $user->id,
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Semua data siswa berhasil diimpor.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors([
+                'import' => 'Gagal mengimpor: ' . $e->getMessage(),
+            ]);
+        }
+    }
 
     public function store(Request $request)
     {
@@ -25,6 +85,7 @@ class StudentController extends Controller
             'nisn' => 'required|numeric|unique:students,nisn',
             'date_of_birth' => 'required|string',
             'gender' => 'required|string',
+            'major_id' => 'required|exists:majors,id',
         ]);
 
         DB::beginTransaction();
@@ -43,6 +104,7 @@ class StudentController extends Controller
                 'date_of_birth' => $request->date_of_birth,
                 'gender' => $request->gender,
                 'phone' => $request->phone,
+                'major_id' => $request->major_id,
                 'user_id' => $user->id,
             ]);
 
@@ -72,6 +134,7 @@ class StudentController extends Controller
             'date_of_birth' => ['required', 'string'],
             'gender' => ['required', 'string'],
             'phone' => ['required', 'numeric'],
+            'major_id' => ['required', 'numeric', Rule::exists('majors', 'id')],
         ]);
 
         DB::beginTransaction();
@@ -90,6 +153,7 @@ class StudentController extends Controller
                 'date_of_birth' => $request->date_of_birth,
                 'phone' => $request->phone,
                 'gender' => $request->gender,
+                'major_id' => $request->major_id,
             ]);
 
             DB::commit();

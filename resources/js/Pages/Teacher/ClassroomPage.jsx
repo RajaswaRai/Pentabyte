@@ -1,10 +1,9 @@
 import Modal from "@/Components/Modal";
 import Assignment from "@/Components/pentabyte/Assignment";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head } from "@inertiajs/react";
+import { Head, Link, router, useForm } from "@inertiajs/react";
 import moment from "moment";
 import { useState } from "react";
-import Comments from "../Features/Comments";
 
 export default function ClassroomPage({
     auth,
@@ -13,6 +12,46 @@ export default function ClassroomPage({
     assignments,
     class_students_count,
 }) {
+    const [showLessonModal, setShowLessonModal] = useState(false);
+    const [modalLessonData, setModalLessonData] = useState({
+        topic: "",
+        description: "",
+    });
+
+    const form = useForm({
+        subject_classroom_teacher_id: sct.id,
+        topic: "",
+        description: "",
+    });
+
+    const openLessonModal = () => {
+        setModalLessonData({ topic: "", description: "" });
+        setShowLessonModal(true);
+    };
+
+    const closeLessonModal = () => {
+        setShowLessonModal(false);
+    };
+
+    const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+
+    const assignmentForm = useForm({
+        subject_classroom_teacher_id: sct.id,
+        topic: "",
+        description: "",
+        due_date: "",
+        due_time: "",
+    });
+
+    const openAssignmentModal = () => {
+        assignmentForm.reset();
+        setShowAssignmentModal(true);
+    };
+
+    const closeAssignmentModal = () => {
+        setShowAssignmentModal(false);
+    };
+
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -72,36 +111,57 @@ export default function ClassroomPage({
                                     <span className="ml-3">Kembali</span>
                                 </a>
                             </div>
-                            <div className="bg-white p-5 rounded-lg"></div>
+                            <div className="bg-white p-5 rounded-lg">
+                                <Link
+                                    href={route("classroom.absence", {
+                                        sct_id: sct.id,
+                                    })}
+                                    className="rounded-md bg-gray-200 w-full"
+                                >
+                                    Absensi
+                                </Link>
+                            </div>
                         </div>
                         <div className="flex-[2]">
                             <div className="bg-white py-3 px-5 lg:px-20 rounded-md mb-3">
                                 <div className="grid grid-cols-2 lg:grid-cols-4 justify-between gap-5">
                                     <div>
-                                        <div className="bg-[#ECFFE7] rounded-md p-2 mb-1">
-                                            <img
-                                                className="mx-auto block w-7 h-7 "
-                                                src="/assets/svg/Bookmark.svg"
-                                                alt=""
-                                            />
+                                        <div
+                                            className="cursor-pointer"
+                                            onClick={openLessonModal}
+                                        >
+                                            <div className="bg-[#ECFFE7] rounded-md p-2 mb-1">
+                                                <img
+                                                    className="mx-auto block w-7 h-7"
+                                                    src="/assets/svg/Bookmark.svg"
+                                                    alt="Materi"
+                                                />
+                                            </div>
+                                            <p className="font-medium text-sm text-center">
+                                                Materi
+                                            </p>
                                         </div>
-                                        <p className="font-medium text-sm text-center">
-                                            Materi
-                                        </p>
                                     </div>
                                     <div>
-                                        <div className="bg-[#DFF7FF] rounded-md p-2 mb-1">
-                                            <img
-                                                className="mx-auto block w-7 h-7"
-                                                src="/assets/svg/Book_duotone.svg"
-                                                alt=""
-                                            />
+                                        <div>
+                                            <div
+                                                className="cursor-pointer"
+                                                onClick={openAssignmentModal}
+                                            >
+                                                <div className="bg-[#DFF7FF] rounded-md p-2 mb-1">
+                                                    <img
+                                                        className="mx-auto block w-7 h-7"
+                                                        src="/assets/svg/Book_duotone.svg"
+                                                        alt="Tugas"
+                                                    />
+                                                </div>
+                                                <p className="font-medium text-sm text-center">
+                                                    Tugas
+                                                </p>
+                                            </div>
                                         </div>
-                                        <p className="font-medium text-sm text-center">
-                                            Tugas
-                                        </p>
                                     </div>
-                                    <div>
+                                    {/* <div>
                                         <div className="bg-[#EFEFFF] rounded-md p-2 mb-1">
                                             <img
                                                 className="mx-auto block w-7 h-7 "
@@ -124,11 +184,10 @@ export default function ClassroomPage({
                                         <p className="font-medium text-sm text-center">
                                             Poll
                                         </p>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                             <div>
-                                {/* Lessons */}
                                 {lessons.map((x, i) => (
                                     <Timeline key={`lesson_${i}`} lesson={x} />
                                 ))}
@@ -224,164 +283,349 @@ export default function ClassroomPage({
                     </div>
                 </div>
             </div>
+
+            {/* Modal Tambah Materi */}
+            <Modal
+                show={showLessonModal}
+                onClose={closeLessonModal}
+                maxWidth="2xl"
+            >
+                <div className="p-6">
+                    <h2 className="text-lg font-bold mb-4">Tambah Materi</h2>
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            router.post(
+                                route("classroom.lesson.store"),
+                                {
+                                    subject_classroom_teacher_id:
+                                        form.data.subject_classroom_teacher_id,
+                                    topic: form.data.topic,
+                                    description: form.data.description,
+                                },
+                                {
+                                    onSuccess: () => {
+                                        form.reset();
+                                        closeLessonModal();
+                                    },
+                                }
+                            );
+                        }}
+                        className="space-y-4"
+                    >
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Topik
+                            </label>
+                            <input
+                                type="text"
+                                className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                                value={form.data.topic}
+                                onChange={(e) =>
+                                    form.setData("topic", e.target.value)
+                                }
+                            />
+                            {form.errors.topic && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    {form.errors.topic}
+                                </p>
+                            )}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Deskripsi
+                            </label>
+                            <textarea
+                                rows={4}
+                                className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                                value={form.data.description}
+                                onChange={(e) =>
+                                    form.setData("description", e.target.value)
+                                }
+                            />
+                            {form.errors.description && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    {form.errors.description}
+                                </p>
+                            )}
+                        </div>
+                        <div className="flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={closeLessonModal}
+                                className="px-4 py-2 bg-gray-300 text-black text-sm rounded hover:bg-gray-400"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                                disabled={form.processing}
+                            >
+                                Tambah
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </Modal>
+
+            <Modal
+                show={showAssignmentModal}
+                onClose={closeAssignmentModal}
+                maxWidth="2xl"
+            >
+                <div className="p-6">
+                    <h2 className="text-lg font-bold mb-4">Tambah Tugas</h2>
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            router.post(
+                                route("classroom.assignment.store"),
+                                assignmentForm.data,
+                                {
+                                    onSuccess: () => {
+                                        assignmentForm.reset();
+                                        closeAssignmentModal();
+                                    },
+                                }
+                            );
+                        }}
+                        className="space-y-4"
+                    >
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Topik
+                            </label>
+                            <input
+                                type="text"
+                                className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                                value={assignmentForm.data.topic}
+                                onChange={(e) =>
+                                    assignmentForm.setData(
+                                        "topic",
+                                        e.target.value
+                                    )
+                                }
+                            />
+                            {assignmentForm.errors.topic && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    {assignmentForm.errors.topic}
+                                </p>
+                            )}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Deskripsi
+                            </label>
+                            <textarea
+                                rows={4}
+                                className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                                value={assignmentForm.data.description}
+                                onChange={(e) =>
+                                    assignmentForm.setData(
+                                        "description",
+                                        e.target.value
+                                    )
+                                }
+                            />
+                            {assignmentForm.errors.description && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    {assignmentForm.errors.description}
+                                </p>
+                            )}
+                        </div>
+                        <div className="flex gap-4">
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Tanggal Tenggat
+                                </label>
+                                <input
+                                    type="date"
+                                    className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                                    value={assignmentForm.data.due_date}
+                                    onChange={(e) =>
+                                        assignmentForm.setData(
+                                            "due_date",
+                                            e.target.value
+                                        )
+                                    }
+                                />
+                                {assignmentForm.errors.due_date && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {assignmentForm.errors.due_date}
+                                    </p>
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Waktu Tenggat
+                                </label>
+                                <input
+                                    type="time"
+                                    className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                                    value={assignmentForm.data.due_time}
+                                    onChange={(e) =>
+                                        assignmentForm.setData(
+                                            "due_time",
+                                            e.target.value
+                                        )
+                                    }
+                                />
+                                {assignmentForm.errors.due_time && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {assignmentForm.errors.due_time}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                        <div className="flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={closeAssignmentModal}
+                                className="px-4 py-2 bg-gray-300 text-black text-sm rounded hover:bg-gray-400"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                                disabled={assignmentForm.processing}
+                            >
+                                Tambah
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </Modal>
         </AuthenticatedLayout>
     );
 }
 
 const Timeline = ({ lesson }) => {
-    console.log(lesson);
+    const [showLessonModal, setShowLessonModal] = useState(false);
+    const [modalLessonData, setModalLessonData] = useState({
+        topic: lesson.topic || "",
+        description: lesson.description || "",
+    });
 
-    return (
-        <div className="bg-white py-8 px-12 rounded-lg">
-            <div className="flex gap-3 mb-5">
-                <img
-                    className="rounded-full w-16 h-16 bg-slate-300 overflow-hidden"
-                    src="/assets/img/Avatar(1).png"
-                    alt="user_profile"
-                />
-                <div>
-                    <p className="text-xl font-semibold">
-                        {lesson.subject_classroom_teacher.teacher.full_name}
-                    </p>
-                    <p className="text-black/50 font-medium">
-                        {/* {"Menambahkan tugas > "}
-                        <span className="text-[#6DD672]">sesi ke 1</span> */}
-                    </p>
-                    <p className="text-black/50 font-medium">
-                        {moment(lesson.created_at).fromNow()}
-                    </p>
-                </div>
-            </div>
-
-            <div>
-                <h1 className="font-bold text-2xl mb-2">{lesson.topic}</h1>
-                <p className="text-black/50 font-medium mb-2">
-                    {lesson.description}
-                </p>
-
-                {/* <div>
-                    <Attachment className="mb-5" />
-                </div> */}
-            </div>
-
-            {/* <div className="border-[1px] border-[#D4D4D4] p-5 rounded-xl mb-5">
-                <div className="flex gap-3 items-center mb-4">
-                    <div className="flex-1">
-                        <Assignment title={""} date={""} time={""} />
-                    </div>
-                    <a className="text-white px-5 py-2 rounded-lg bg-[#27B1E0] text-sm font-semibold">
-                        Lihat Detail
-                    </a>
-                </div>
-                <p className="text-black/50 text-xs font-medium">
-                    Lorem ipsum dolor
-                </p>
-            </div> */}
-
-            <hr className="border-t-[1px] border-[#D4D4D4] mb-5" />
-
-            <div className="flex justify-between gap-3">
-                <CommentModalButton lesson_id={lesson.id} />
-                <div>
-                    <div>
-                        <img
-                            src="/assets/svg/Back.svg"
-                            alt="share"
-                            className="inline -mt-1"
-                        />
-                        <span className="ml-2 text-sm font-medium text-black/50">
-                            Share
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-function CommentModalButton({ lesson_id }) {
-    const [showModal, setShowModal] = useState(false);
-    const [comments, setComments] = useState([]);
-    const [loading, setLoading] = useState(false);
-
-    const loadComments = async () => {
-        setLoading(true);
-        try {
-            const response = await fetch(`/lesson/${lesson_id}/comments`, {
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest",
-                    Accept: "application/json",
-                },
-            });
-            const data = await response.json();
-            setComments(data.comments);
-        } catch (error) {
-            setComments([]);
-        }
-        setLoading(false);
+    const openLessonModal = () => {
+        setShowLessonModal(true);
     };
 
-    const openModal = () => {
-        setShowModal(true);
-        loadComments();
+    const closeLessonModal = () => {
+        setShowLessonModal(false);
     };
 
     return (
         <>
-            <button onClick={openModal} className="flex items-center">
-                <img
-                    src="/assets/svg/comment.svg"
-                    alt="comment"
-                    className="-mt-1"
-                />
-                <span className="ml-2 text-sm font-medium text-black/50">
-                    Komentar
-                </span>
-            </button>
+            <div className="bg-white py-8 mb-5 px-12 rounded-lg relative group hover:shadow-lg transition">
+                {/* Tombol Hapus */}
+                <div className="absolute top-5 right-5 hidden group-hover:block">
+                    <button
+                        onClick={() => {
+                            if (
+                                confirm(
+                                    `Yakin ingin menghapus materi "${lesson.topic}"?`
+                                )
+                            ) {
+                                router.delete(
+                                    route("classroom.lesson.destroy", {
+                                        id: lesson.id,
+                                    }),
+                                    { preserveScroll: true }
+                                );
+                            }
+                        }}
+                        className="text-red-500 text-sm font-medium hover:underline"
+                    >
+                        Hapus
+                    </button>
+                </div>
 
+                <div className="flex gap-3 mb-5">
+                    <img
+                        className="rounded-full w-16 h-16 bg-slate-300 overflow-hidden"
+                        src="/assets/img/Avatar(1).png"
+                        alt="user_profile"
+                    />
+                    <div>
+                        <p className="text-xl font-semibold">
+                            {lesson.subject_classroom_teacher.teacher.full_name}
+                        </p>
+                        <p className="text-black/50 font-medium">
+                            {moment(lesson.created_at).fromNow()}
+                        </p>
+                    </div>
+                </div>
+
+                <div>
+                    <h1 className="font-bold text-2xl mb-2">{lesson.topic}</h1>
+                    <p className="text-black/50 font-medium mb-2">
+                        {lesson.description}
+                    </p>
+                </div>
+
+                {lesson.assignment && (
+                    <div className="mt-4">
+                        <h4 className="text-sm font-semibold text-black">
+                            Tugas
+                        </h4>
+                        <p className="text-sm text-black/70">
+                            Tenggat:{" "}
+                            <span className="font-medium text-black">
+                                {moment(lesson.assignment.due_date).format(
+                                    "D MMMM YYYY"
+                                )}{" "}
+                                pukul {lesson.assignment.due_time}
+                            </span>
+                        </p>
+                    </div>
+                )}
+            </div>
+
+            {/* Modal Detail Materi */}
             <Modal
-                show={showModal}
-                onClose={() => setShowModal(false)}
+                show={showLessonModal}
+                onClose={closeLessonModal}
                 maxWidth="2xl"
             >
                 <div className="p-6">
-                    <div className="min-h-[50vh] overflow-hidden scroll-auto flex flex-col space-y-4 max-h-64 overflow-y-auto">
-                        <Comments comments={comments} loading={loading} />
-                    </div>
-                    <div className="mt-4">
-                        <textarea
-                            placeholder="Tulis komentar..."
-                            rows={3}
-                            className="w-full p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring focus:border-blue-300"
-                        />
-                        <button className="mt-3 px-4 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600">
-                            Kirim
-                        </button>
-                    </div>
+                    <h2 className="text-lg font-bold mb-4">Detail Materi</h2>
+                    <form className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Topik
+                            </label>
+                            <input
+                                type="text"
+                                className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                                value={modalLessonData.topic}
+                                readOnly
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Deskripsi
+                            </label>
+                            <textarea
+                                rows={4}
+                                className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                                value={modalLessonData.description}
+                                readOnly
+                            />
+                        </div>
+                        <div className="text-right">
+                            <button
+                                type="button"
+                                onClick={closeLessonModal}
+                                className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                            >
+                                Tutup
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </Modal>
         </>
-    );
-}
-
-const Attachment = (props) => {
-    return (
-        <div {...props}>
-            <div className="bg-[#E2E7FF] px-4 py-2 rounded-md flex justify-between gap-5 items-center">
-                <div className="flex gap-5 items-center">
-                    <img
-                        className="h-5"
-                        src="/assets/svg/docs.svg"
-                        alt="docs.svg"
-                    />
-                    <p className="text-black/50 font-medium">
-                        Lorem ipsum dolor sit amet.doc
-                    </p>
-                </div>
-                <button className="text-[#6DD672] text-sm font-semibold">
-                    Download
-                </button>
-            </div>
-        </div>
     );
 };

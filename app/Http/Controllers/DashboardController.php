@@ -38,6 +38,46 @@ class DashboardController extends Controller
                 break;
         }
     }
+    
+    public function absence(Request $request, $sct_id) {
+        
+        switch ($request->user()->role) {
+            case UserRole::STUDENT:
+                return (new StudentController)->absence($request, $sct_id);
+            case UserRole::TEACHER:
+                return (new TeacherController)->absence($request, $sct_id);
+            case UserRole::GUARDIAN:
+                return (new StudentController)->absence($request, $sct_id);
+            default:
+                break;
+        }
+    }
+    public function absence_create(Request $request, $sct_id) {
+        
+        switch ($request->user()->role) {
+            case UserRole::STUDENT:
+                return (new StudentController)->absence_create($request, $sct_id);
+            case UserRole::TEACHER:
+                return (new TeacherController)->absence_create($request, $sct_id);
+            case UserRole::GUARDIAN:
+                return (new StudentController)->absence_create($request, $sct_id);
+            default:
+                break;
+        }
+    }
+    public function absence_show(Request $request, $sct_id, $id) {
+        
+        switch ($request->user()->role) {
+            case UserRole::STUDENT:
+                return (new StudentController)->absence_show($request, $sct_id, $id);
+            case UserRole::TEACHER:
+                return (new TeacherController)->absence_show($request, $sct_id, $id);
+            case UserRole::GUARDIAN:
+                return (new StudentController)->absence_show($request, $sct_id, $id);
+            default:
+                break;
+        }
+    }
 
     public function assignments(Request $request) {
 
@@ -66,6 +106,40 @@ class DashboardController extends Controller
                 return (new TeacherController)->assignment($request, $lesson_id, $assignment_id);
             case UserRole::GUARDIAN:
                 return (new StudentController)->assignment($request, $lesson_id, $assignment_id);
+            default:
+                break;
+        }
+    }
+    public function assignment_store(Request $request,) {
+
+        switch ($request->user()->role) {
+            case UserRole::ADMIN:
+                return (new AdminController)->assignment_store($request);
+            case UserRole::STUDENT:
+                return (new StudentController)->assignment_store($request);
+            case UserRole::TEACHER:
+                return (new TeacherController)->assignment_store($request);
+            case UserRole::GUARDIAN:
+                return (new StudentController)->assignment_store($request);
+            default:
+                break;
+        }
+    }
+
+    public function lesson_store(Request $request) {
+         switch ($request->user()->role) {
+            
+            case UserRole::TEACHER:
+                return (new TeacherController)->lesson_store($request);
+            default:
+                break;
+        }
+    }
+    public function lesson_delete(Request $request, $id) {
+         switch ($request->user()->role) {
+            
+            case UserRole::TEACHER:
+                return (new TeacherController)->lesson_delete($request, $id);
             default:
                 break;
         }
