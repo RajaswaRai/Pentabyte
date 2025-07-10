@@ -117,7 +117,7 @@ class TeacherController extends Controller
         
         $class_students_count = $sct->classroom->students->count();
 
-        return Inertia::render('Student/AssignmentDetailPage', compact('sct', 'assignment', 'class_students_count'));
+        return Inertia::render('Teacher/AssignmentDetailPage', compact('sct', 'assignment', 'class_students_count'));
     }
     public function assignment_store(Request $request) {
 

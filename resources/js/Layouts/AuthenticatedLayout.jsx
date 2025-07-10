@@ -23,7 +23,7 @@ export default function Authenticated({ user, header, children }) {
 
                         <div className="flex items-center justify-between">
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink
+                                {/* <NavLink
                                     href={route("dashboard")}
                                     active={route().current("dashboard")}
                                 >
@@ -33,14 +33,14 @@ export default function Authenticated({ user, header, children }) {
                                     href={route("assignments")}
                                     active={route().current("assignments")}
                                 >
-                                    Beranda
+                                    Tugas
                                 </NavLink>
                                 <NavLink
                                     href={route("report_card")}
                                     active={route().current("report_card")}
                                 >
                                     Report
-                                </NavLink>
+                                </NavLink> */}
                             </div>
                         </div>
 

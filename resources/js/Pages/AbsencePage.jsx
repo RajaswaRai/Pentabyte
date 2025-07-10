@@ -92,8 +92,8 @@ function InfoBlock({ label, value }) {
 function BackLink() {
     return (
         <div className="mb-5">
-            <a
-                href="#"
+            <button
+                onClick={() => window.history.back()}
                 className="inline-flex items-center text-[#133475] font-semibold mb-5"
             >
                 <img
@@ -102,7 +102,7 @@ function BackLink() {
                     className="inline -mt-2"
                 />
                 <span className="ml-3">Kembali</span>
-            </a>
+            </button>
         </div>
     );
 }

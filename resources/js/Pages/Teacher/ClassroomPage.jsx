@@ -101,7 +101,7 @@ export default function ClassroomPage({
                             <div>
                                 <a
                                     className="mb-5 font-semibold text-[#133475]"
-                                    href=""
+                                    href={window.history.back()}
                                 >
                                     <img
                                         src="/assets/svg/Back.svg"
@@ -111,7 +111,7 @@ export default function ClassroomPage({
                                     <span className="ml-3">Kembali</span>
                                 </a>
                             </div>
-                            <div className="bg-white p-5 rounded-lg">
+                            {/* <div className="bg-white p-5 rounded-lg">
                                 <Link
                                     href={route("classroom.absence", {
                                         sct_id: sct.id,
@@ -120,7 +120,7 @@ export default function ClassroomPage({
                                 >
                                     Absensi
                                 </Link>
-                            </div>
+                            </div> */}
                         </div>
                         <div className="flex-[2]">
                             <div className="bg-white py-3 px-5 lg:px-20 rounded-md mb-3">
@@ -161,7 +161,7 @@ export default function ClassroomPage({
                                             </div>
                                         </div>
                                     </div>
-                                    {/* <div>
+                                    <div>
                                         <div className="bg-[#EFEFFF] rounded-md p-2 mb-1">
                                             <img
                                                 className="mx-auto block w-7 h-7 "
@@ -184,7 +184,7 @@ export default function ClassroomPage({
                                         <p className="font-medium text-sm text-center">
                                             Poll
                                         </p>
-                                    </div> */}
+                                    </div>
                                 </div>
                             </div>
                             <div>

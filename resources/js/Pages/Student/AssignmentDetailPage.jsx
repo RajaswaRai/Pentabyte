@@ -174,9 +174,9 @@ export default function AssignmentDetailPage({
                     <div className="flex gap-5">
                         <div className="min-w-80">
                             <div>
-                                <a
+                                <button
                                     className="mb-5 font-semibold text-[#133475]"
-                                    href=""
+                                    onClick={() => window.history.back()}
                                 >
                                     <img
                                         src="/assets/svg/Back.svg"
@@ -184,7 +184,7 @@ export default function AssignmentDetailPage({
                                         className="inline -mt-2"
                                     />
                                     <span className="ml-3">Kembali</span>
-                                </a>
+                                </button>
                             </div>
                             <div className="bg-white p-5 rounded-lg"></div>
                         </div>

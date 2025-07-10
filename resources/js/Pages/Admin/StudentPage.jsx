@@ -153,7 +153,7 @@ export default function StudentPage({ auth, students, majors }) {
                 cell: ({ row }) => (
                     <div className="flex gap-2">
                         {/* detail */}
-                        <button
+                        {/* <button
                             className="p-1 rounded-md bg-blue-500 text-white"
                             onClick={() =>
                                 router.get(
@@ -162,7 +162,7 @@ export default function StudentPage({ auth, students, majors }) {
                             }
                         >
                             View
-                        </button>
+                        </button> */}
                         {/* edit */}
                         <button
                             onClick={() => {

@@ -64,7 +64,7 @@ export default function ClassroomPage({
                             <div>
                                 <a
                                     className="mb-5 font-semibold text-[#133475]"
-                                    href=""
+                                    href={window.history.back()}
                                 >
                                     <img
                                         src="/assets/svg/Back.svg"

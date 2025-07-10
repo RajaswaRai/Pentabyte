@@ -91,7 +91,7 @@ export default function AssignmentDetailPage({
                             <div>
                                 <a
                                     className="mb-5 font-semibold text-[#133475]"
-                                    href=""
+                                    href={window.history.back()}
                                 >
                                     <img
                                         src="/assets/svg/Back.svg"
@@ -107,7 +107,7 @@ export default function AssignmentDetailPage({
                             <h1 className="font-semibold text-xl text-black/70 mb-3">
                                 {assignment.name} {">"} {sct.subject.name}
                             </h1>
-                            <div className="bg-white rounded-md mb-3">
+                            {/* <div className="bg-white rounded-md mb-3">
                                 <div className="p-3">
                                     <p className="font-medium">Sisa Waktu:</p>
                                 </div>
@@ -133,6 +133,14 @@ export default function AssignmentDetailPage({
                                 <hr className="border-t-2" />
                                 <div className="p-3">
                                     <textarea name="" id=""></textarea>
+                                </div>
+                            </div> */}
+                            <div className="bg-white rounded-md mb-3">
+                                <div className="p-3">
+                                    <p className="font-bold mb-5 text-xl">
+                                        {assignment.name}
+                                    </p>
+                                    <p>{assignment.description}</p>
                                 </div>
                             </div>
                         </div>
