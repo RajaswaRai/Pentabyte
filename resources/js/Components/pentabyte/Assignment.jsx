@@ -1,6 +1,11 @@
-export default function Assignment({ title, datetime }) {
+import { daysName } from "@/settings";
+import { Link } from "@inertiajs/react";
+import moment from "moment";
+import "moment/locale/id";
+
+export default function Assignment({ href, title, date, time }) {
     return (
-        <div className="flex items-center gap-5 mb-3">
+        <Link href={href} className="flex items-center gap-5">
             <div className="p-2 rounded-full bg-[#C5DCFA]">
                 <img
                     src="/assets/svg/Book_duotone.svg"
@@ -9,9 +14,16 @@ export default function Assignment({ title, datetime }) {
                 />
             </div>
             <div>
-                <h2 className="font-bold text-lg">{title}</h2>
-                <p className="text-sm text-black/50">Batas waktu: {datetime}</p>
+                <h2 className="font-bold">{title}</h2>
+                <p className="text-xs font-semibold text-black/50 capitalize">
+                    Batas waktu:
+                    {` ${daysName[moment(date).day()]} ${moment(
+                        `${date}T${time}`
+                    )
+                        .locale("id")
+                        .format("D MMMM YYYY HH:mm")}`}
+                </p>
             </div>
-        </div>
+        </Link>
     );
 }

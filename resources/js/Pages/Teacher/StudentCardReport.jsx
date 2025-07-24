@@ -1,13 +1,13 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 
-export default function Absence({ auth }) {
+export default function ReportCardPage({ auth }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
             header={
                 <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-                    Absence
+                    Report Card
                 </h2>
             }
         >

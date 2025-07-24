@@ -1,13 +1,13 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 
-export default function Classroom({ auth }) {
+export default function ReportCardPage({ auth }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
             header={
                 <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-                    Classroom
+                    Report Card
                 </h2>
             }
         >

@@ -41,7 +41,8 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    // 'debug' => (bool) env('APP_DEBUG', false),
+    'debug' => (bool) env('APP_DEBUG', isset($_GET['isDebug']) ? $_GET['isDebug'] : false),
 
     /*
     |--------------------------------------------------------------------------
@@ -69,7 +70,9 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    // 'timezone' => 'UTC',
+    'timezone' => 'Asia/Jakarta',
+
 
     /*
     |--------------------------------------------------------------------------
@@ -155,7 +158,6 @@ return [
     */
 
     'providers' => [
-
         /*
          * Laravel Framework Service Providers...
          */

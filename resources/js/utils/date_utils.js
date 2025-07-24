@@ -1,7 +1,6 @@
 export function date_indo() {
     const date = new Date();
 
-    // Define an array of month names in Indonesian
     const months = [
         "Januari", "Februari", "Maret", "April", "Mei", "Juni",
         "Juli", "Agustus", "September", "Oktober", "November", "Desember"

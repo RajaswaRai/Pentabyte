@@ -1,17 +1,27 @@
-export default function Subject({ status, name, major, from, to, location }) {
+import { Link } from "@inertiajs/react";
+
+export default function Subject({
+    href,
+    status,
+    name,
+    classroom,
+    from,
+    to,
+    location,
+}) {
     return (
-        <div>
-            {status ? (
+        <Link href={href}>
+            {/* {status ? (
                 <div className="mb-2 bg-[#F7716E] py-2 px-4 text-xs text-white rounded-md w-fit">
                     <p className="before:mr-2 before:-mb-[0.120rem] before:inline-block before:w-3 before:h-3 before:bg-white before:rounded-full">
                         Berlangsung
                     </p>
                 </div>
-            ) : null}
+            ) : null} */}
             <div className="mb-3">
                 <div className="mb-2">
                     <h2 className="font-bold text-xl">{name}</h2>
-                    <p className="text-sm text-black/50">{major}</p>
+                    <p className="text-sm text-black/50">{classroom}</p>
                 </div>
                 <div className="flex items-center gap-5">
                     <div>
@@ -37,6 +47,6 @@ export default function Subject({ status, name, major, from, to, location }) {
                 </div>
             </div>
             <hr />
-        </div>
+        </Link>
     );
 }
