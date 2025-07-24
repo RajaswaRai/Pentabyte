@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class StudentController extends Controller
 {
@@ -23,11 +24,34 @@ class StudentController extends Controller
             return redirect()->back()->withErrors(['import' => 'Data tidak valid.']);
         }
 
+        $errors = [];
+
+        // Normalisasi dan validasi awal
+        foreach ($students as $index => &$student) {
+            // Normalisasi tanggal dari Excel serial number atau string
+            if (isset($student['date_of_birth'])) {
+                if (is_numeric($student['date_of_birth'])) {
+                    try {
+                        $student['date_of_birth'] = Date::excelToDateTimeObject($student['date_of_birth'])->format('Y-m-d');
+                    } catch (\Exception $e) {
+                        $errors["students.$index.date_of_birth"] = ['Format tanggal tidak valid (serial number gagal dikonversi).'];
+                    }
+                } elseif (!strtotime($student['date_of_birth'])) {
+                    $errors["students.$index.date_of_birth"] = ['Format tanggal tidak dikenali.'];
+                }
+            }
+        }
+        unset($student); // hapus reference
+
+        // Jika ada error parsing awal, langsung kembalikan
+        if (!empty($errors)) {
+            return redirect()->back()->withErrors($errors);
+        }
+
         DB::beginTransaction();
 
         try {
-            foreach ($students as $student) {
-                // Validasi manual per siswa
+            foreach ($students as $index => $student) {
                 $validator = Validator::make($student, [
                     'full_name' => 'required|string|max:255',
                     'nisn' => 'required|numeric|unique:students,nisn',
@@ -39,10 +63,10 @@ class StudentController extends Controller
                 ]);
 
                 if ($validator->fails()) {
-                    throw new \Exception('Validasi gagal: ' . json_encode($validator->errors()->all()));
+                    $errors["students.$index"] = $validator->errors()->toArray();
+                    continue;
                 }
 
-                // Simpan user
                 $user = User::create([
                     'username' => $student['nisn'],
                     'email' => $student['email'] ?? null,
@@ -50,18 +74,22 @@ class StudentController extends Controller
                     'role' => UserRole::STUDENT,
                 ]);
 
-                $major = Major::where('code', $student['major_code'])->firstOrFail();
+                $major = Major::where('code', $student['major_code'])->first();
 
-                // Simpan student
                 Student::create([
                     'full_name' => $student['full_name'],
                     'nisn' => $student['nisn'],
                     'date_of_birth' => $student['date_of_birth'],
                     'gender' => $student['gender'],
                     'phone' => $student['phone'] ?? null,
-                    'major_id' => $major->id ?? null,
+                    'major_id' => $major->id,
                     'user_id' => $user->id,
                 ]);
+            }
+
+            if (!empty($errors)) {
+                DB::rollBack();
+                return redirect()->back()->withErrors($errors);
             }
 
             DB::commit();
@@ -69,10 +97,11 @@ class StudentController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withErrors([
-                'import' => 'Gagal mengimpor: ' . $e->getMessage(),
+                'Gagal mengimpor: ' . $e->getMessage(),
             ]);
         }
     }
+
 
     public function store(Request $request)
     {

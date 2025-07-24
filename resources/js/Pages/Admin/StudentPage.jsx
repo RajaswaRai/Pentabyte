@@ -65,6 +65,32 @@ export default function StudentPage({ auth, students, majors }) {
 
     const [search, setSearch] = useState("");
 
+    const importErrors =
+        errors &&
+        Object.entries(errors).reduce((acc, [key, message]) => {
+            const matchField = key.match(/^students\.(\d+)\.(.+)$/);
+            const matchRow = key.match(/^students\.(\d+)$/);
+
+            if (matchField) {
+                const row = parseInt(matchField[1], 10);
+                const field = matchField[2];
+                acc[row] = acc[row] || {};
+                acc[row][field] = message;
+            } else if (matchRow && typeof message === "object") {
+                const row = parseInt(matchRow[1], 10);
+                acc[row] = {
+                    ...(acc[row] || {}),
+                    ...message,
+                };
+            } else {
+                // Masukkan global error ke baris -1
+                acc[-1] = acc[-1] || {};
+                acc[-1][key] = message;
+            }
+
+            return acc;
+        }, {});
+
     function formatExcelDate(value) {
         if (!value) return "";
 
@@ -240,16 +266,36 @@ export default function StudentPage({ auth, students, majors }) {
                 }}
             >
                 <div className="p-6">
-                    {Object.entries(errors)
-                        .filter(([key]) => key.startsWith("students."))
-                        .map(([key, message], i) => (
-                            <div
-                                key={i}
-                                className="text-red-600 bg-red-100 p-2 rounded mb-1 text-sm"
-                            >
-                                {key}: {message}
-                            </div>
-                        ))}
+                    {importErrors &&
+                        Object.entries(importErrors).map(
+                            ([rowIndex, rowErrors], i) => (
+                                <div
+                                    key={`error_row_${i}`}
+                                    className="bg-red-100 text-red-700 text-sm p-3 rounded mb-2"
+                                >
+                                    {parseInt(rowIndex) >= 0 ? (
+                                        <div className="font-bold mb-1">
+                                            Baris ke-{parseInt(rowIndex) + 1}:
+                                        </div>
+                                    ) : (
+                                        <div className="font-bold mb-1">
+                                            Error Umum:
+                                        </div>
+                                    )}
+                                    {Object.entries(rowErrors).map(
+                                        ([field, msg], j) => (
+                                            <div key={j}>
+                                                {field}:{" "}
+                                                {Array.isArray(msg)
+                                                    ? msg.join(", ")
+                                                    : msg}
+                                            </div>
+                                        )
+                                    )}
+                                </div>
+                            )
+                        )}
+
                     <h2 className="text-lg font-semibold mb-4">
                         Import Data Murid dari XLS/XLSX
                     </h2>
