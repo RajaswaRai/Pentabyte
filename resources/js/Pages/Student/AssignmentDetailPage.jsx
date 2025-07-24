@@ -1,30 +1,37 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
 import moment from "moment";
-import { useEffect, useRef, useState } from "react";
-import { EditorState } from "prosemirror-state";
-import { EditorView } from "prosemirror-view";
-import { schema } from "prosemirror-schema-basic";
-import { keymap } from "prosemirror-keymap";
-import { baseKeymap, toggleMark, wrapIn } from "prosemirror-commands";
-import { undo, redo, history } from "prosemirror-history";
-import "prosemirror-view/style/prosemirror.css";
-import "prosemirror-menu/style/menu.css";
-
-import { menuBar, blockTypeItem, icons, MenuItem } from "prosemirror-menu";
+import { useEffect, useState } from "react";
 
 export default function AssignmentDetailPage({
     auth,
     sct,
     class_students_count,
+    lesson,
     assignment,
+    academic_period,
 }) {
     const [countdown, setCountdown] = useState("");
-    const editorRef = useRef(null);
-    const editorViewRef = useRef(null);
-    const [answerContent, setAnswerContent] = useState("");
 
+    let parsedAttachments = [];
+
+    try {
+        parsedAttachments = JSON.parse(lesson.attachments || "[]");
+        if (!Array.isArray(parsedAttachments)) {
+            parsedAttachments = [];
+        }
+    } catch (error) {
+        console.error("Gagal parsing attachments:", error);
+        parsedAttachments = [];
+    }
+
+    const [hasAssignment, setHasAssignment] = useState(false);
     useEffect(() => {
+        setHasAssignment(!!assignment);
+    }, [assignment]);
+    useEffect(() => {
+        if (!hasAssignment || !assignment) return; // Pastikan assignment ada
+
         const updateCountdown = () => {
             const deadline = moment(
                 `${assignment.due_date} ${assignment.due_time}`,
@@ -32,101 +39,22 @@ export default function AssignmentDetailPage({
             );
             const now = moment();
             const diff = deadline.diff(now);
-            if (diff <= 0) return setCountdown("Waktu telah habis");
-            const totalSeconds = Math.floor(moment.duration(diff).asSeconds());
-            const days = Math.floor(totalSeconds / (60 * 60 * 24));
-            const hours = Math.floor(
-                (totalSeconds % (60 * 60 * 24)) / (60 * 60)
+
+            if (diff <= 0) {
+                setCountdown("Waktu telah habis");
+                return;
+            }
+
+            const duration = moment.duration(diff);
+            setCountdown(
+                `${duration.days()}d ${duration.hours()}h ${duration.minutes()}m ${duration.seconds()}s`
             );
-            const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
-            const seconds = totalSeconds % 60;
-            setCountdown(`${days}d ${hours}h ${minutes}m ${seconds}s`);
         };
+
         updateCountdown();
         const timer = setInterval(updateCountdown, 1000);
         return () => clearInterval(timer);
-    }, [assignment.due_date, assignment.due_time]);
-
-    useEffect(() => {
-        if (editorRef.current && !editorViewRef.current) {
-            const marks = schema.marks;
-            const nodes = schema.nodes;
-
-            const items = [
-                new MenuItem({
-                    command: toggleMark(marks.strong),
-                    title: "Bold",
-                    icon: icons.strong,
-                }),
-                new MenuItem({
-                    command: toggleMark(marks.em),
-                    title: "Italic",
-                    icon: icons.em,
-                }),
-                new MenuItem({
-                    command: toggleMark(marks.code),
-                    title: "Code",
-                    icon: icons.code,
-                }),
-                blockTypeItem(nodes.paragraph, {
-                    title: "Paragraph",
-                    label: "P",
-                }),
-                blockTypeItem(nodes.heading, {
-                    title: "Heading 1",
-                    label: "H1",
-                    attrs: { level: 1 },
-                }),
-                blockTypeItem(nodes.heading, {
-                    title: "Heading 2",
-                    label: "H2",
-                    attrs: { level: 2 },
-                }),
-                new MenuItem({
-                    command: wrapIn(nodes.blockquote),
-                    title: "Blockquote",
-                    icon: icons.blockquote,
-                }),
-                new MenuItem({
-                    command: wrapIn(nodes.bullet_list),
-                    title: "Bullet List",
-                    icon: icons.bulletList,
-                }),
-                new MenuItem({
-                    command: wrapIn(nodes.ordered_list),
-                    title: "Ordered List",
-                    icon: icons.orderedList,
-                }),
-                new MenuItem({
-                    command: undo,
-                    title: "Undo",
-                    icon: icons.undo,
-                }),
-                new MenuItem({
-                    command: redo,
-                    title: "Redo",
-                    icon: icons.redo,
-                }),
-            ];
-
-            editorViewRef.current = new EditorView(editorRef.current, {
-                state: EditorState.create({
-                    doc: schema.topNodeType.createAndFill(),
-                    plugins: [
-                        history(),
-                        keymap(baseKeymap),
-                        menuBar({ floating: false, content: [items] }), // <- FIX: wrapped in another array
-                    ],
-                }),
-                dispatchTransaction(transaction) {
-                    const newState =
-                        editorViewRef.current.state.apply(transaction);
-                    editorViewRef.current.updateState(newState);
-                    setAnswerContent(newState.doc.textContent);
-                },
-            });
-        }
-    }, []);
+    }, [hasAssignment, assignment?.due_date, assignment?.due_time]); // Gunakan optional chaining
 
     return (
         <AuthenticatedLayout
@@ -137,7 +65,8 @@ export default function AssignmentDetailPage({
                 </h2>
             }
         >
-            <Head title="Assignment Detail" />
+            <Head title="Assignmet Detail" />
+
             <div className="rounded-b-[1.5rem] bg-gradient-to-r from-[#153580] to-[#0C3159] text-white">
                 <div className="py-8 px-20 max-w-screen-2xl mx-auto">
                     <div className="mb-8">
@@ -154,7 +83,7 @@ export default function AssignmentDetailPage({
                             </p>
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-[#D0D0D0]">Jumlah Peserta</h3>
+                            <h3 className="text-[#D0D0D0]">Jumlah Murid</h3>
                             <p className="text-xl font-medium">
                                 {class_students_count}
                             </p>
@@ -162,7 +91,7 @@ export default function AssignmentDetailPage({
                         <div className="flex-1">
                             <h3 className="text-[#D0D0D0]">Periode Akademik</h3>
                             <p className="text-xl font-medium">
-                                2024/2025 Genap
+                                {academic_period}
                             </p>
                         </div>
                     </div>
@@ -174,9 +103,11 @@ export default function AssignmentDetailPage({
                     <div className="flex gap-5">
                         <div className="min-w-80">
                             <div>
-                                <button
+                                <Link
                                     className="mb-5 font-semibold text-[#133475]"
-                                    onClick={() => window.history.back()}
+                                    href={
+                                        document.referrer || route("dashboard")
+                                    }
                                 >
                                     <img
                                         src="/assets/svg/Back.svg"
@@ -184,15 +115,15 @@ export default function AssignmentDetailPage({
                                         className="inline -mt-2"
                                     />
                                     <span className="ml-3">Kembali</span>
-                                </button>
+                                </Link>
                             </div>
-                            <div className="bg-white p-5 rounded-lg"></div>
                         </div>
                         <div className="flex-1">
                             <h1 className="font-semibold text-xl text-black/70 mb-3">
-                                {assignment.name} {">"} {sct.subject.name}
+                                {hasAssignment ? assignment.name : lesson.topic}{" "}
+                                {">"} {sct.subject.name}
                             </h1>
-                            <div className="bg-white rounded-md mb-3">
+                            {/* <div className="bg-white rounded-md mb-3">
                                 <div className="p-3">
                                     <p className="font-medium">Sisa Waktu:</p>
                                 </div>
@@ -217,10 +148,77 @@ export default function AssignmentDetailPage({
                                 </div>
                                 <hr className="border-t-2" />
                                 <div className="p-3">
-                                    <div
-                                        ref={editorRef}
-                                        className="bg-white border border-gray-300 rounded-md overflow-hidden"
-                                    />
+                                    <textarea name="" id=""></textarea>
+                                </div>
+                            </div> */}
+                            <div className="bg-white rounded-md mb-3">
+                                <div className="p-3">
+                                    <p className="font-bold mb-5 text-xl">
+                                        {hasAssignment
+                                            ? assignment.name
+                                            : lesson.topic}
+                                    </p>
+                                    <p>
+                                        {hasAssignment
+                                            ? assignment.description
+                                            : lesson.description}
+                                    </p>
+
+                                    <div>
+                                        {parsedAttachments.length > 0 && (
+                                            <div className="mt-4">
+                                                <h4 className="text-sm font-semibold text-black mb-2">
+                                                    File Lampiran
+                                                </h4>
+                                                <div className="space-y-2">
+                                                    {parsedAttachments.map(
+                                                        (filePath, index) => {
+                                                            const fileName =
+                                                                filePath
+                                                                    .split("/")
+                                                                    .pop();
+                                                            return (
+                                                                <div
+                                                                    key={index}
+                                                                    className="flex items-center bg-[#E2E7FF] p-3 rounded-md"
+                                                                >
+                                                                    <svg
+                                                                        className="w-5 h-5 mr-2 text-gray-500"
+                                                                        fill="none"
+                                                                        stroke="currentColor"
+                                                                        viewBox="0 0 24 24"
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                    >
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            strokeWidth={
+                                                                                2
+                                                                            }
+                                                                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                                                        />
+                                                                    </svg>
+                                                                    <a
+                                                                        href={`/${filePath}`}
+                                                                        download={
+                                                                            fileName
+                                                                        }
+                                                                        className="text-gray-500 hover:text-blue-800 text-sm font-medium"
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                    >
+                                                                        {
+                                                                            fileName
+                                                                        }
+                                                                    </a>
+                                                                </div>
+                                                            );
+                                                        }
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>

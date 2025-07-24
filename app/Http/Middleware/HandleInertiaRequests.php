@@ -34,6 +34,11 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user() ? $request->user()->load('admin', 'student', 'teacher', 'guardian') : null,
             ],
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+                // Anda bisa menambahkan tipe flash message lainnya jika perlu
+            ],
         ];
     }
 }

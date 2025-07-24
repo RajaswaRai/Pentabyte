@@ -48,9 +48,9 @@ export default function UpdateProfileInformation({
                     Profile Information
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-600">
+                {/* <p className="mt-1 text-sm text-gray-600">
                     Update your account's profile information and email address.
-                </p>
+                </p> */}
             </header>
 
             <form onSubmit={submit} className="mt-6 space-y-6">
@@ -60,11 +60,12 @@ export default function UpdateProfileInformation({
                     <TextInput
                         id="full_name"
                         type="text"
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full text-gray-500"
                         value={data.full_name}
                         onChange={(e) => setData("full_name", e.target.value)}
                         autoComplete="full_name"
                         isFocused
+                        disabled
                     />
 
                     <InputError className="mt-2" message={errors.full_name} />
@@ -122,7 +123,7 @@ export default function UpdateProfileInformation({
                 )}
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                    {/* <PrimaryButton disabled={processing}>Save</PrimaryButton> */}
 
                     <Transition
                         show={recentlySuccessful}

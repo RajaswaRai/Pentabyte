@@ -8,7 +8,7 @@ import { Head, Link } from "@inertiajs/react";
 import { useState } from "react";
 import moment from "moment";
 
-const ScheduleView = ({ sct }) => {
+const ScheduleView = ({ sct, semesters }) => {
     const [selectedDay, setSelectedDay] = useState(moment().day()); // 0–6
 
     const filteredSCT = sct.filter((x) => x.day === selectedDay.toString());
@@ -25,7 +25,7 @@ const ScheduleView = ({ sct }) => {
             <div className="flex flex-col gap-3">
                 {filteredSCT.map((x, i) => (
                     <Subject
-                        href={`/sct/${x.id}`}
+                        href={route("classroom", x.id)}
                         key={`subject_${i}`}
                         status={1}
                         name={x.subject.name}
@@ -40,16 +40,20 @@ const ScheduleView = ({ sct }) => {
     );
 };
 
-function SubjectSection({ sct }) {
+function SubjectSection({ sct, semesters }) {
     const [search, setSearch] = useState("");
+    const [selectedSemester, setSelectedSemester] = useState(semesters[0]?.id);
 
     const filteredSCT = sct.filter((x) => {
         const query = search.toLowerCase();
-        return (
+        const matchSearch =
             x.subject.name.toLowerCase().includes(query) ||
             x.classroom.name.toLowerCase().includes(query) ||
-            x.teacher.full_name.toLowerCase().includes(query)
-        );
+            x.teacher.full_name.toLowerCase().includes(query);
+
+        const matchSemester = x.classroom.semester_id === selectedSemester;
+
+        return matchSearch && matchSemester;
     });
 
     return (
@@ -76,8 +80,20 @@ function SubjectSection({ sct }) {
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
-                    <select className="bg-[#F4F7FC] p-2 pr-10 text-sm text-black/50 rounded-md border-none">
-                        <option value="2024/2025 Genap">2024/2025 Genap</option>
+                    <select
+                        className="bg-[#F4F7FC] p-2 pr-10 text-sm text-black/50 rounded-md border-none"
+                        value={selectedSemester}
+                        onChange={(e) =>
+                            setSelectedSemester(parseInt(e.target.value))
+                        }
+                    >
+                        {semesters.map((s, i) => {
+                            return (
+                                <option value={s.id} key={s.id}>
+                                    {s.name}
+                                </option>
+                            );
+                        })}
                     </select>
                 </div>
             </div>
@@ -85,7 +101,7 @@ function SubjectSection({ sct }) {
             <div className="grid grid-cols-2 grid-flow-row gap-4 mt-4">
                 {filteredSCT.map((x, i) => (
                     <SubjectCard
-                        href={`/sct/${x.id}`}
+                        href={route("classroom", x.id)}
                         key={`class_${i}`}
                         color="blue"
                         title={x.subject.name}
@@ -101,7 +117,7 @@ function SubjectSection({ sct }) {
     );
 }
 
-export default function DashboardPage({ auth, sct, assignments }) {
+export default function DashboardPage({ auth, sct, semesters }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -128,25 +144,8 @@ export default function DashboardPage({ auth, sct, assignments }) {
                                 </div>
                                 <ScheduleView sct={sct} />
                             </div>
-                            <div className="bg-white rounded-md shadow-md p-5 mb-4">
-                                <h1 className="font-bold text-xl">
-                                    Tugas Belum Dikumpulkan
-                                </h1>
-                                <hr />
-                                <div className="pt-5">
-                                    {assignments.map((x, i) => (
-                                        <Assignment
-                                            href={`/lesson/${x.lesson.id}/assignment/${x.id}`}
-                                            title={x.name}
-                                            date={x.due_date}
-                                            time={x.due_time}
-                                            key={`assginemt_${i}`}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
                         </div>
-                        <SubjectSection sct={sct} />
+                        <SubjectSection sct={sct} semesters={semesters} />
                     </div>
                 </div>
             </div>

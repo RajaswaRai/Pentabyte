@@ -46,13 +46,13 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // SHARED ROUTE
-    Route::get('/sct/{id}', [DashboardController::class, 'subject'])->name('classroom');
+    Route::get('/classroom_subject/{id}', [DashboardController::class, 'subject'])->name('classroom');
+    Route::get('/classroom_subject/{id}/lesson/{lesson_id}', [DashboardController::class, 'lesson'])->name('classroom.lesson');
 
-    Route::get('/sct/{sct_id}/absence', [DashboardController::class, 'absence'])->name('classroom.absence');
-    Route::get('/sct/{sct_id}/absence/create', [DashboardController::class, 'absence_create'])->name('classroom.absence.create');
-    Route::get('/sct/{sct_id}/absence/{id}', [DashboardController::class, 'absence_show'])->name('classroom.absence.show');
-    Route::post('/absence/save/{id}', [AbsenceController::class, 'save'])->name('absence.save');
-    Route::put('/absence/update/{absenceId}', [AbsenceController::class, 'update'])->name('absence.update');
+    Route::get('/classroom_subject/{sct_id}/absence', [DashboardController::class, 'absence'])->name('classroom.absence');
+    Route::post('/classroom_subject/{sct_id}/absence/save', [AbsenceController::class, 'save'])->name('absence.save');
+    // Route::put('/classroom_subject/{sct_id}/absence/{date}', [AbsenceController::class, 'update'])->name('absence.update');
+    Route::get('/classroom_subject/{sct_id}/absence/{date}', [DashboardController::class, 'absence_show'])->name('classroom.absence.show');
     Route::delete('/absence/delete/{absenceId}', [AbsenceController::class, 'delete'])->name('absence.delete');
 
     Route::post('/classroom/lesson', [DashboardController::class, 'lesson_store'])->name('classroom.lesson.store');
@@ -60,7 +60,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/classroom/lesson/{id}', [DashboardController::class, 'lesson_delete'])->name('classroom.lesson.destroy');
     Route::get('/lesson/{lesson}/comments', [DashboardController::class, 'comments'])->name('lesson.comments');
     Route::get('/assignments', [DashboardController::class, 'assignments'])->name('assignments');
-    Route::get('/lesson/{lesson_id}/assignment/{assignment_id}', [DashboardController::class, 'assignment'])->name('assignment');
+    
 
     // STUDENT & GUARDIAN
     Route::get('/report-card', function () {

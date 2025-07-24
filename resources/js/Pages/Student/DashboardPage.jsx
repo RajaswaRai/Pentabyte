@@ -25,7 +25,7 @@ const ScheduleView = ({ sct }) => {
             <div className="flex flex-col gap-3">
                 {filteredSCT.map((x, i) => (
                     <Subject
-                        href={`/sct/${x.id}`}
+                        href={route("classroom", x.id)}
                         key={`subject_${i}`}
                         status={1}
                         name={x.subject.name}
@@ -85,7 +85,7 @@ function SubjectSection({ sct }) {
             <div className="grid grid-cols-2 grid-flow-row gap-4 mt-4">
                 {filteredSCT.map((x, i) => (
                     <SubjectCard
-                        href={`/sct/${x.id}`}
+                        href={route("classroom", x.id)}
                         key={`class_${i}`}
                         color="blue"
                         title={x.subject.name}
@@ -130,18 +130,26 @@ export default function DashboardPage({ auth, sct, assignments }) {
                             </div>
                             <div className="bg-white rounded-md shadow-md p-5 mb-4">
                                 <h1 className="font-bold text-xl">
-                                    Tugas Belum Dikumpulkan
+                                    List Tugas
                                 </h1>
                                 <hr />
                                 <div className="pt-5">
                                     {assignments.map((x, i) => (
-                                        <Assignment
-                                            href={`/lesson/${x.lesson.id}/assignment/${x.id}`}
-                                            title={x.name}
-                                            date={x.due_date}
-                                            time={x.due_time}
-                                            key={`assginemt_${i}`}
-                                        />
+                                        <div className="mb-5">
+                                            <Assignment
+                                                href={route(
+                                                    "classroom.lesson",
+                                                    {
+                                                        lesson_id: x.lesson.id,
+                                                        id: x.id,
+                                                    }
+                                                )}
+                                                title={x.name}
+                                                date={x.due_date}
+                                                time={x.due_time}
+                                                key={`assginemt_${i}`}
+                                            />
+                                        </div>
                                     ))}
                                 </div>
                             </div>

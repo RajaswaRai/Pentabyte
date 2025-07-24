@@ -11,13 +11,13 @@ export default function Subject({
 }) {
     return (
         <Link href={href}>
-            {status ? (
+            {/* {status ? (
                 <div className="mb-2 bg-[#F7716E] py-2 px-4 text-xs text-white rounded-md w-fit">
                     <p className="before:mr-2 before:-mb-[0.120rem] before:inline-block before:w-3 before:h-3 before:bg-white before:rounded-full">
                         Berlangsung
                     </p>
                 </div>
-            ) : null}
+            ) : null} */}
             <div className="mb-3">
                 <div className="mb-2">
                     <h2 className="font-bold text-xl">{name}</h2>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Constants\UserRole;
 use App\Http\Controllers\Admin\AdminController;
 use App\Models\LessonComment;
+use App\Models\SubjectClassTeacher;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -48,19 +49,6 @@ class DashboardController extends Controller
                 return (new TeacherController)->absence($request, $sct_id);
             case UserRole::GUARDIAN:
                 return (new StudentController)->absence($request, $sct_id);
-            default:
-                break;
-        }
-    }
-    public function absence_create(Request $request, $sct_id) {
-        
-        switch ($request->user()->role) {
-            case UserRole::STUDENT:
-                return (new StudentController)->absence_create($request, $sct_id);
-            case UserRole::TEACHER:
-                return (new TeacherController)->absence_create($request, $sct_id);
-            case UserRole::GUARDIAN:
-                return (new StudentController)->absence_create($request, $sct_id);
             default:
                 break;
         }
@@ -126,6 +114,21 @@ class DashboardController extends Controller
         }
     }
 
+    public function lesson(Request $request, $id, $lesson_id) {
+
+        SubjectClassTeacher::findOrFail($id);
+
+        switch ($request->user()->role) {
+            case UserRole::STUDENT:
+                return (new StudentController)->lesson($request, $lesson_id);
+            case UserRole::TEACHER:
+                return (new TeacherController)->lesson($request, $lesson_id);
+            // case UserRole::GUARDIAN:
+            //     return (new StudentController)->lesson($request);
+            default:
+                break;
+        }
+    }
     public function lesson_store(Request $request) {
          switch ($request->user()->role) {
             

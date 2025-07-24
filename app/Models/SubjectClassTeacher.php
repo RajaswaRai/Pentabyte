@@ -20,4 +20,7 @@ class SubjectClassTeacher extends Model
     public function teacher() {
         return $this->belongsTo(Teacher::class, 'teacher_id', 'id');
     }
+    public function absences() {
+        return $this->hasMany(Absence::class, 'subject_class_teacher_id', 'id');
+    }
 }

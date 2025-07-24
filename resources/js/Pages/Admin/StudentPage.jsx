@@ -93,20 +93,27 @@ export default function StudentPage({ auth, students, majors }) {
 
             const headers = jsonData[0];
             const rows = jsonData.slice(1);
-            const formattedData = rows.map((row) => {
-                let obj = {};
-                headers.forEach((header, index) => {
-                    let value = row[index] ?? "";
+            const formattedData = rows
+                .map((row) => {
+                    let obj = {};
+                    headers.forEach((header, index) => {
+                        let value = row[index] ?? "";
 
-                    // Format tanggal otomatis jika deteksi header mengandung kata "tanggal"
-                    if (header.toLowerCase().includes("tanggal")) {
-                        value = formatExcelDate(value);
-                    }
+                        // Format tanggal otomatis jika deteksi header mengandung kata "tanggal"
+                        if (header.toLowerCase().includes("tanggal")) {
+                            value = formatExcelDate(value);
+                        }
 
-                    obj[header] = value;
-                });
-                return obj;
-            });
+                        obj[header] = value;
+                    });
+                    return obj;
+                })
+                .filter((row) =>
+                    Object.values(row).some(
+                        (cell) =>
+                            cell !== null && cell !== "" && cell !== undefined
+                    )
+                );
 
             setImportedData(formattedData);
 

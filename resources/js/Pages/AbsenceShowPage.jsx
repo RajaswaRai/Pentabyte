@@ -1,21 +1,35 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, router } from "@inertiajs/react";
+import { Head, Link, router } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 
-export default function AbsenceShow({ auth, sct }) {
-    const [selectedDate, setSelectedDate] = useState(() => {
-        const today = new Date();
-        return today.toISOString().split("T")[0]; // Format: 'YYYY-MM-DD'
-    });
+export default function AbsenceShow({ auth, sct, date }) {
+    // const [selectedDate, setSelectedDate] = useState(() => {
+    //     const today = new Date();
+    //     return today.toISOString().split("T")[0]; // Format: 'YYYY-MM-DD'
+    // });
+    const selectedDate = new Date(date).toISOString().split("T")[0]; // Format: 'YYYY-MM-DD'
     const [attendance, setAttendance] = useState({});
 
     // Inisialisasi data siswa dari props
     useEffect(() => {
-        if (sct?.classroom?.students) {
+        if (sct?.classroom?.students && sct?.absences) {
             const initialAttendance = {};
+
             sct.classroom.students.forEach((student) => {
-                initialAttendance[student.id] = ""; // Kosong artinya belum dipilih
+                const existingAbsence = sct.absences.find(
+                    (absence) => absence.student_id === student.id
+                );
+
+                // Pastikan status yang ada sesuai dengan opsi yang tersedia
+                const validStatus = ["H", "I", "A", "S"].includes(
+                    existingAbsence?.status
+                )
+                    ? existingAbsence?.status
+                    : "";
+
+                initialAttendance[student.id] = validStatus;
             });
+
             setAttendance(initialAttendance);
         }
     }, [sct]);
@@ -53,8 +67,7 @@ export default function AbsenceShow({ auth, sct }) {
         );
 
         // Kirim ke server
-        router.post(route("absence.save"), {
-            subject_classroom_teacher_id: sct.id,
+        router.post(route("absence.save", { sct_id: sct.id }), {
             date: selectedDate,
             students: formattedAttendance,
         });
@@ -75,6 +88,20 @@ export default function AbsenceShow({ auth, sct }) {
 
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    <div className="mb-3">
+                        <Link
+                            className="mb-5 font-semibold text-[#133475]"
+                            href={document.referrer || route("dashboard")}
+                        >
+                            <img
+                                src="/assets/svg/Back.svg"
+                                alt="back"
+                                className="inline -mt-2"
+                            />
+                            <span className="ml-3">Kembali</span>
+                        </Link>
+                    </div>
+
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
                             <div className="mb-5">
@@ -84,14 +111,12 @@ export default function AbsenceShow({ auth, sct }) {
                                 <h2 className="text-gray-700 mb-3">
                                     {sct.subject.name} | {sct.classroom.name}
                                 </h2>
-                                <div className="flex gap-3 justify-end items-center mb-4">
+                                <div className="flex gap-3 justify-between items-center mb-4">
                                     <input
                                         className="rounded-md border px-2 py-1"
                                         type="date"
+                                        readOnly
                                         value={selectedDate}
-                                        onChange={(e) =>
-                                            setSelectedDate(e.target.value)
-                                        }
                                     />
                                     <div className="flex gap-2 items-center">
                                         <input
@@ -128,7 +153,7 @@ export default function AbsenceShow({ auth, sct }) {
                                                     className="border-b hover:bg-gray-50"
                                                 >
                                                     <td>
-                                                        <div className="flex gap-3">
+                                                        <div className="flex gap-3 p-3">
                                                             <span>
                                                                 {index + 1}.
                                                             </span>
@@ -138,7 +163,7 @@ export default function AbsenceShow({ auth, sct }) {
                                                                         student.full_name
                                                                     }
                                                                 </p>
-                                                                <p>
+                                                                <p className="text-sm">
                                                                     {
                                                                         student.nisn
                                                                     }
@@ -154,26 +179,47 @@ export default function AbsenceShow({ auth, sct }) {
                                                                 "A",
                                                                 "S",
                                                             ].map((status) => (
-                                                                <button
+                                                                <div
                                                                     key={status}
-                                                                    onClick={() =>
-                                                                        setStatus(
-                                                                            student.id,
-                                                                            status
-                                                                        )
-                                                                    }
-                                                                    className={`p-2 w-10 h-10 flex items-center justify-center rounded-full border-[1px] ${
-                                                                        attendance[
-                                                                            student
-                                                                                .id
-                                                                        ] ===
-                                                                        status
-                                                                            ? "bg-blue-500 text-white border-blue-500"
-                                                                            : "border-[#898989] text-[#898989]"
-                                                                    }`}
+                                                                    className="relative"
                                                                 >
-                                                                    {status}
-                                                                </button>
+                                                                    <input
+                                                                        type="radio"
+                                                                        name={`attendance-${student.id}`}
+                                                                        id={`attendance-${student.id}-${status}`}
+                                                                        value={
+                                                                            status
+                                                                        }
+                                                                        checked={
+                                                                            attendance[
+                                                                                student
+                                                                                    .id
+                                                                            ] ==
+                                                                            status
+                                                                        }
+                                                                        onChange={() =>
+                                                                            setStatus(
+                                                                                student.id,
+                                                                                status
+                                                                            )
+                                                                        }
+                                                                        className="absolute opacity-0 w-0 h-0"
+                                                                    />
+                                                                    <label
+                                                                        htmlFor={`attendance-${student.id}-${status}`}
+                                                                        className={`p-2 w-10 h-10 flex items-center justify-center rounded-full border-[1px] cursor-pointer ${
+                                                                            attendance[
+                                                                                student
+                                                                                    .id
+                                                                            ] ===
+                                                                            status
+                                                                                ? "bg-blue-500 text-white border-blue-500"
+                                                                                : "border-[#898989] text-[#898989]"
+                                                                        }`}
+                                                                    >
+                                                                        {status}
+                                                                    </label>
+                                                                </div>
                                                             ))}
                                                         </div>
                                                     </td>

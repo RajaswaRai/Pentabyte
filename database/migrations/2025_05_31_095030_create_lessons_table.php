@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('subject_class_teacher_id')->nullable()->constrained('subject_class_teachers', 'id')->cascadeOnDelete();
             $table->string('topic');
             $table->text('description');
+            $table->json('attachments')->nullable();
             $table->timestamps();
         });
     }

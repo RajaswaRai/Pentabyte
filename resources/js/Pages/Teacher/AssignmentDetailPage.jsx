@@ -1,5 +1,5 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
 import moment from "moment";
 import { useEffect, useState } from "react";
 
@@ -7,11 +7,31 @@ export default function AssignmentDetailPage({
     auth,
     sct,
     class_students_count,
+    lesson,
     assignment,
+    academic_period,
 }) {
     const [countdown, setCountdown] = useState("");
 
+    let parsedAttachments = [];
+
+    try {
+        parsedAttachments = JSON.parse(lesson.attachments || "[]");
+        if (!Array.isArray(parsedAttachments)) {
+            parsedAttachments = [];
+        }
+    } catch (error) {
+        console.error("Gagal parsing attachments:", error);
+        parsedAttachments = [];
+    }
+
+    const [hasAssignment, setHasAssignment] = useState(false);
     useEffect(() => {
+        setHasAssignment(!!assignment);
+    }, [assignment]);
+    useEffect(() => {
+        if (!hasAssignment || !assignment) return; // Pastikan assignment ada
+
         const updateCountdown = () => {
             const deadline = moment(
                 `${assignment.due_date} ${assignment.due_time}`,
@@ -25,22 +45,16 @@ export default function AssignmentDetailPage({
                 return;
             }
 
-            const totalSeconds = Math.floor(moment.duration(diff).asSeconds());
-
-            const days = Math.floor(totalSeconds / (60 * 60 * 24));
-            const hours = Math.floor(
-                (totalSeconds % (60 * 60 * 24)) / (60 * 60)
+            const duration = moment.duration(diff);
+            setCountdown(
+                `${duration.days()}d ${duration.hours()}h ${duration.minutes()}m ${duration.seconds()}s`
             );
-            const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
-            const seconds = totalSeconds % 60;
-
-            setCountdown(`${days}d ${hours}h ${minutes}m ${seconds}s`);
         };
 
         updateCountdown();
         const timer = setInterval(updateCountdown, 1000);
         return () => clearInterval(timer);
-    }, [assignment.due_date, assignment.due_time]);
+    }, [hasAssignment, assignment?.due_date, assignment?.due_time]); // Gunakan optional chaining
 
     return (
         <AuthenticatedLayout
@@ -69,7 +83,7 @@ export default function AssignmentDetailPage({
                             </p>
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-[#D0D0D0]">Jumlah Peserta</h3>
+                            <h3 className="text-[#D0D0D0]">Jumlah Murid</h3>
                             <p className="text-xl font-medium">
                                 {class_students_count}
                             </p>
@@ -77,7 +91,7 @@ export default function AssignmentDetailPage({
                         <div className="flex-1">
                             <h3 className="text-[#D0D0D0]">Periode Akademik</h3>
                             <p className="text-xl font-medium">
-                                2024/2025 Genap
+                                {academic_period}
                             </p>
                         </div>
                     </div>
@@ -89,9 +103,11 @@ export default function AssignmentDetailPage({
                     <div className="flex gap-5">
                         <div className="min-w-80">
                             <div>
-                                <a
+                                <Link
                                     className="mb-5 font-semibold text-[#133475]"
-                                    href={window.history.back()}
+                                    href={
+                                        document.referrer || route("dashboard")
+                                    }
                                 >
                                     <img
                                         src="/assets/svg/Back.svg"
@@ -99,13 +115,13 @@ export default function AssignmentDetailPage({
                                         className="inline -mt-2"
                                     />
                                     <span className="ml-3">Kembali</span>
-                                </a>
+                                </Link>
                             </div>
-                            <div className="bg-white p-5 rounded-lg"></div>
                         </div>
                         <div className="flex-1">
                             <h1 className="font-semibold text-xl text-black/70 mb-3">
-                                {assignment.name} {">"} {sct.subject.name}
+                                {hasAssignment ? assignment.name : lesson.topic}{" "}
+                                {">"} {sct.subject.name}
                             </h1>
                             {/* <div className="bg-white rounded-md mb-3">
                                 <div className="p-3">
@@ -138,9 +154,71 @@ export default function AssignmentDetailPage({
                             <div className="bg-white rounded-md mb-3">
                                 <div className="p-3">
                                     <p className="font-bold mb-5 text-xl">
-                                        {assignment.name}
+                                        {hasAssignment
+                                            ? assignment.name
+                                            : lesson.topic}
                                     </p>
-                                    <p>{assignment.description}</p>
+                                    <p>
+                                        {hasAssignment
+                                            ? assignment.description
+                                            : lesson.description}
+                                    </p>
+
+                                    <div>
+                                        {parsedAttachments.length > 0 && (
+                                            <div className="mt-4">
+                                                <h4 className="text-sm font-semibold text-black mb-2">
+                                                    File Lampiran
+                                                </h4>
+                                                <div className="space-y-2">
+                                                    {parsedAttachments.map(
+                                                        (filePath, index) => {
+                                                            const fileName =
+                                                                filePath
+                                                                    .split("/")
+                                                                    .pop();
+                                                            return (
+                                                                <div
+                                                                    key={index}
+                                                                    className="flex items-center bg-[#E2E7FF] p-3 rounded-md"
+                                                                >
+                                                                    <svg
+                                                                        className="w-5 h-5 mr-2 text-gray-500"
+                                                                        fill="none"
+                                                                        stroke="currentColor"
+                                                                        viewBox="0 0 24 24"
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                    >
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            strokeWidth={
+                                                                                2
+                                                                            }
+                                                                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                                                        />
+                                                                    </svg>
+                                                                    <a
+                                                                        href={`/${filePath}`}
+                                                                        download={
+                                                                            fileName
+                                                                        }
+                                                                        className="text-gray-500 hover:text-blue-800 text-sm font-medium"
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                    >
+                                                                        {
+                                                                            fileName
+                                                                        }
+                                                                    </a>
+                                                                </div>
+                                                            );
+                                                        }
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
