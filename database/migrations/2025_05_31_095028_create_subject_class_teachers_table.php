@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('subject_class_teachers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('subject_id')->nullable()->constrained('subjects', 'id')->nullOnDelete();
+            $table->foreignId('subject_id')->nullable()->constrained('subjects', 'id')->cascadeOnDelete();
             $table->foreignId('classroom_id')->nullable()->constrained('classrooms', 'id')->cascadeOnDelete();
-            $table->foreignId('teacher_id')->nullable()->constrained('teachers', 'id')->nullOnDelete();
+            $table->foreignId('teacher_id')->nullable()->constrained('teachers', 'id')->cascadeOnDelete();
             $table->enum('day', [0,1,2,3,4,5,6]);
             $table->time('start_time');
             $table->time('end_time');

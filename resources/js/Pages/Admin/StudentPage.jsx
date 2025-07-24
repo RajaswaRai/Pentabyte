@@ -3,6 +3,7 @@ import { Head, useForm, router } from "@inertiajs/react";
 import { useMemo, useState } from "react";
 import Modal from "@/Components/Modal";
 import * as XLSX from "xlsx";
+import { usePage } from "@inertiajs/react";
 import {
     useReactTable,
     getCoreRowModel,
@@ -17,6 +18,8 @@ export default function StudentPage({ auth, students, majors }) {
     const [importedData, setImportedData] = useState([]);
     const [columnMapping, setColumnMapping] = useState({});
 
+    const { errors } = usePage().props;
+
     const dbFields = [
         { value: "nisn", label: "NISN" },
         { value: "full_name", label: "Nama Lengkap" },
@@ -27,7 +30,7 @@ export default function StudentPage({ auth, students, majors }) {
         { value: "major_code", label: "Jurusan" },
     ];
 
-    const { data, setData, post, processing, reset, errors } = useForm({
+    const { data, setData, post, processing, reset } = useForm({
         full_name: "",
         nisn: "",
         date_of_birth: "",
@@ -237,6 +240,16 @@ export default function StudentPage({ auth, students, majors }) {
                 }}
             >
                 <div className="p-6">
+                    {Object.entries(errors)
+                        .filter(([key]) => key.startsWith("students."))
+                        .map(([key, message], i) => (
+                            <div
+                                key={i}
+                                className="text-red-600 bg-red-100 p-2 rounded mb-1 text-sm"
+                            >
+                                {key}: {message}
+                            </div>
+                        ))}
                     <h2 className="text-lg font-semibold mb-4">
                         Import Data Murid dari XLS/XLSX
                     </h2>
